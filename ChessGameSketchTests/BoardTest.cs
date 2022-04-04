@@ -122,5 +122,28 @@ namespace ChessGameSketch
             };
             result.Should().BeEquivalentTo(expected);
         }
+
+        [TestMethod]
+        public void GetAllowedMoves_ForKnight_WhenNoFiguresOnTheWay_CorrectAllowedMoves()
+        {
+            // Arrange
+            Board board = new Board();
+            Knight knight = new Knight(new Vector2(6, 5), Player.White);
+            board.PutFigure(knight);
+
+            // Act
+            List<Vector2> result = board.GetAllowedMoves(knight);
+
+            //Assert
+            List<Vector2> expected = new List<Vector2>() {
+                new Vector2(4, 6),
+                new Vector2(4, 4),
+                new Vector2(5, 3),
+                new Vector2(7, 3),
+                new Vector2(7, 7),
+                new Vector2(5, 7),
+            };
+            result.Should().BeEquivalentTo(expected);
+        }
     }
 }

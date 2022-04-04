@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace ChessGameSketch
 {
-    class Knight : Figure
+    public class Knight : Figure
     {
         public Knight(Vector2 position, Player player) : base(position, player)
         {
