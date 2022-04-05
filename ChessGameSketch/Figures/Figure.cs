@@ -21,6 +21,21 @@ namespace ChessGameSketch
         }
 
         public abstract PossibleMoves GetPossibleMoves();
+
+        public override bool Equals(object? obj)
+        {
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override string? ToString()
+        {
+            return $"{this.GetType().Name}, {player}, {position}, {sign}";
+        }
     }
 
     public enum Player

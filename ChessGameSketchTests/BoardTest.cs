@@ -26,6 +26,7 @@ namespace ChessGameSketch
             List<Vector2> expected = new List<Vector2>() { new Vector2(0, 3), new Vector2(0, 2) };
             result.Should().BeEquivalentTo(expected);
         }
+
         [TestMethod]
         public void GetAllowedMoves_ForPawn_CorrectSecondAllowedMove()
         {
@@ -37,9 +38,10 @@ namespace ChessGameSketch
             List<Vector2> result = board.GetAllowedMoves(board.FigureAt(new Vector2(0, 2)));
 
             //Assert
-            List<Vector2> expected = new List<Vector2>() { new Vector2(0, 3)};
+            List<Vector2> expected = new List<Vector2>() { new Vector2(0, 3) };
             result.Should().BeEquivalentTo(expected);
         }
+
         [TestMethod]
         public void GetAllowedMoves_ForPawn_WhenOnTheLastTile_NoAllowedMoves()
         {
@@ -53,6 +55,7 @@ namespace ChessGameSketch
             //Assert
             result.Should().BeEmpty();
         }
+
         [TestMethod]
         public void GetAllowedMoves_ForPawn_WhenFigureAhead_NoAllowedMoves()
         {
@@ -119,6 +122,7 @@ namespace ChessGameSketch
                 new Vector2(5, 5),
                 new Vector2(5, 3),
                 new Vector2(6, 2),
+                new Vector2(2, 2),
             };
             result.Should().BeEquivalentTo(expected);
         }
@@ -209,6 +213,144 @@ namespace ChessGameSketch
                 new Vector2(7, 0)
             };
             result.Should().BeEquivalentTo(expected);
+        }
+
+        [TestMethod]
+        public void GetAllowedMoves_ForRook_WhenFiguresOnTheWay_CorrectAllowedMoves()
+        {
+            // Arrange
+            Board board = new Board();
+            Rook rook = new Rook(new Vector2(5, 4), Player.Black);
+            Pawn obstaclePawn = new Pawn(new Vector2(3, 4), Player.Black);
+            board.PutFigure(rook);
+            board.PutFigure(obstaclePawn);
+
+            // Act
+            List<Vector2> result = board.GetAllowedMoves(rook);
+
+            //Assert
+            List<Vector2> expected = new List<Vector2>() {
+                new Vector2(5, 7),
+                new Vector2(5, 6),
+                new Vector2(5, 5),
+                new Vector2(5, 3),
+                new Vector2(5, 2),
+                new Vector2(5, 1),
+                new Vector2(5, 0),
+                new Vector2(4, 4),
+                new Vector2(6, 4),
+                new Vector2(7, 4),
+            };
+            result.Should().BeEquivalentTo(expected);
+        }
+
+        [TestMethod]
+        public void PutFigure_AddsFigureToList_AndPutsFigureOnTile()
+        {
+            // Arrange
+            Board board = new Board();
+            Rook rook = new Rook(new Vector2(3, 3), Player.White);
+
+            // Act
+            board.PutFigure(rook);
+
+            // Assert
+            board.figuresAtBoard.Should().Contain(rook);
+            board.FigureAt(rook.position).Should().Be(rook);
+        }
+
+        [TestMethod]
+        public void MoveFigure_UpdatesFiguresPositionInList_AndUpdatesTiles()
+        {
+            // Arrange
+            Board board = new Board();
+            Vector2 initialPosition = new Vector2(3, 3);
+            Rook rook = new Rook(initialPosition, Player.White);
+            board.PutFigure(rook);
+
+            // Act
+            Vector2 newPosition = new Vector2(4, 4);
+            board.MoveFigure(rook.position, newPosition);
+
+            // Assert
+            board.figuresAtBoard.Find(new Predicate<Figure>(fig => fig.Equals(rook))).position.Equals(newPosition);
+            board.FigureAt(initialPosition).Should().BeNull();
+            board.FigureAt(newPosition).Should().Be(rook);
+        }
+
+        [TestMethod]
+        public void DeleteFigure_RemovesFigureFromList_AndFromTiles()
+        {
+            // Arrange
+            Board board = new Board();
+            Rook rook = new Rook(new Vector2(3, 3), Player.White);
+            board.PutFigure(rook);
+
+            // Act
+            board.DeleteFigure(rook.position);
+
+            // Assert
+            board.figuresAtBoard.Find(new Predicate<Figure>(fig => fig.Equals(rook))).Should().BeNull();
+            board.FigureAt(rook.position).Should().BeNull();
+        }
+
+        [TestMethod]
+        public void GetKingUnderAttack_WhenBlackRookAttacksKing_ReturnsWhiteKing()
+        {
+            // Arrange
+            Board board = new Board();
+            King blackKing = new King(new Vector2(5, 5), Player.Black);
+            board.PutFigure(blackKing);
+            King whiteKing = new King(new Vector2(0, 4), Player.White);
+            board.PutFigure(whiteKing);
+            Rook rook = new Rook(new Vector2(4, 4), Player.Black);
+            board.PutFigure(rook);
+
+            // Act
+            King result = board.GetKingUnderAttack();
+
+            // Assert
+            result.Should().Be(whiteKing);
+        }
+
+        [TestMethod]
+        public void GetKingUnderAttack_WhenWhiteRookAttacksKing_ReturnsBlackKing()
+        {
+            // Arrange
+            Board board = new Board();
+            King whiteKing = new King(new Vector2(5, 5), Player.White);
+            board.PutFigure(whiteKing);
+            King blackKing = new King(new Vector2(0, 4), Player.Black);
+            board.PutFigure(blackKing);
+            Rook rook = new Rook(new Vector2(4, 4), Player.White);
+            board.PutFigure(rook);
+
+            // Act
+            King result = board.GetKingUnderAttack();
+
+            // Assert
+            result.Should().Be(blackKing);
+        }
+
+        [TestMethod]
+        public void GetKingUnderAttack_WhenKingIsCoveredByAnotherFigure_ReturnsNull()
+        {
+            // Arrange
+            Board board = new Board();
+            King whiteKing = new King(new Vector2(0, 4), Player.White);
+            board.PutFigure(whiteKing);
+            King blackKing = new King(new Vector2(5, 5), Player.Black);
+            board.PutFigure(blackKing);
+            Pawn coveringPawn = new Pawn(new Vector2(1, 4), Player.White);
+            board.PutFigure(coveringPawn);
+            Rook rook = new Rook(new Vector2(4, 4), Player.Black);
+            board.PutFigure(rook);
+
+            // Act
+            King result = board.GetKingUnderAttack();
+
+            // Assert
+            result.Should().BeNull();
         }
     }
 }
