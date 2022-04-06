@@ -14,18 +14,13 @@ namespace ChessGameSketch
             this.Player = player;
         }
 
-        public void UpdatePosition(Vector2 newPosition)
-        {
-            this.Position = newPosition;
-        }
-
         public abstract FigureMoves GetFigureMoves();
         public abstract FigureType GetFigureType();
         public abstract Figure GetCopy();
 
-        public override bool Equals(object? obj)
+        public void UpdatePosition(Vector2 newPosition)
         {
-            return base.Equals(obj);
+            this.Position = newPosition;
         }
 
         public bool SamePlayerAs(Figure other)
@@ -43,11 +38,5 @@ namespace ChessGameSketch
             return $"{this.GetType().Name}, {Player}, {Position}";
         }
 
-    }
-
-    public enum Player
-    {
-        White,
-        Black
     }
 }
