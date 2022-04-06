@@ -10,7 +10,7 @@ namespace ChessGameSketch
     public class FigureMove
     {
         public Vector2 Direction { get; }
-        private bool Repeatable { get; }
+        public bool Repeatable { get; }
 
         public FigureMove(Vector2 direction, bool repeatable)
         {
