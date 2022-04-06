@@ -9,20 +9,19 @@ namespace ChessGameSketch
         {
         }
 
-        public override FigureMoves GetFigureMoves()
+        public override List<FigureMove> GetFigureMoves()
         {
-            return new FigureMoves(new List<Vector2>()
+            return new List<FigureMove>()
             {
-                new Vector2(-2, 1),
-                new Vector2(-2, -1),
-                new Vector2(2, 1),
-                new Vector2(2, -1),
-                new Vector2(1, 2),
-                new Vector2(-1,2),
-                new Vector2(1,-2),
-                new Vector2(-1,-2)
-            },
-            false);
+                new FigureMove(new Vector2(-2, 1), false),
+                new FigureMove(new Vector2(-2, -1), false),
+                new FigureMove(new Vector2(2, 1), false),
+                new FigureMove(new Vector2(2, -1), false),
+                new FigureMove(new Vector2(1, 2), false),
+                new FigureMove(new Vector2(-1,2), false),
+                new FigureMove(new Vector2(1,-2), false),
+                new FigureMove(new Vector2(-1,-2), false)
+            };
         }
         public override FigureType GetFigureType()
         {

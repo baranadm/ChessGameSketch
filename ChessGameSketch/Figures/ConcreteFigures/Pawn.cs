@@ -9,42 +9,42 @@ namespace ChessGameSketch
         {
         }
 
-        public override FigureMoves GetFigureMoves()
+        public override List<FigureMove> GetFigureMoves()
         {
-            List<Vector2> directions = new List<Vector2>();
+            List<FigureMove> moves = new List<FigureMove>();
             
             if(Player == Player.White)
             {
-                directions.Add(new Vector2(0, 1));
+                moves.Add(new FigureMove(new Vector2(0, 1), false));
                 if(Position.Y==1)
                 {
-                    directions.Add(new Vector2(0, 2));
+                    moves.Add(new FigureMove(new Vector2(0, 2), false));
                 }
             } else
             {
-                directions.Add(new Vector2(0, -1));
+                moves.Add(new FigureMove(new Vector2(0, -1), false));
                 if(Position.Y==6)
                 {
-                    directions.Add(new Vector2(0, -2));
+                    moves.Add(new FigureMove(new Vector2(0, -2), false));
                 }
             }
 
-            return new FigureMoves(directions, false);
+            return moves;
         }
 
-        public FigureMoves GetAttackDirections()
+        public List<FigureMove> GetAttackMoves()
         {
-            List<Vector2> attackDirections = new List<Vector2>();
+            List<FigureMove> moves = new List<FigureMove>();
             if(Player == Player.White)
             {
-                attackDirections.Add(new Vector2(1, 1));
-                attackDirections.Add(new Vector2(-1, 1));
+                moves.Add(new FigureMove(new Vector2(1, 1), false));
+                moves.Add(new FigureMove(new Vector2(-1, 1), false));
             } else
             {
-                attackDirections.Add(new Vector2(1, -1));
-                attackDirections.Add(new Vector2(-1, -1));
+                moves.Add(new FigureMove(new Vector2(1, -1), false));
+                moves.Add(new FigureMove(new Vector2(-1, -1), false));
             }
-            return new FigureMoves(attackDirections, false);
+            return moves;
         }
 
         public override FigureType GetFigureType()

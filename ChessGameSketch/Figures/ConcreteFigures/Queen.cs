@@ -8,20 +8,19 @@ namespace ChessGameSketch
         public Queen(Vector2 position, Player player) : base(position, player)
         {
         }
-        public override FigureMoves GetFigureMoves()
+        public override List<FigureMove> GetFigureMoves()
         {
-            return new FigureMoves(new List<Vector2>()
+            return new List<FigureMove>()
             {
-                new Vector2(1, 1),
-                new Vector2(1, 0),
-                new Vector2(1, -1),
-                new Vector2(0, -1),
-                new Vector2(-1, -1),
-                new Vector2(-1, 0),
-                new Vector2(-1, 1),
-                new Vector2(0, 1)
-            },
-            true);
+                new FigureMove(new Vector2(1, 1), true),
+                new FigureMove(new Vector2(1, 0), true),
+                new FigureMove(new Vector2(1, -1), true),
+                new FigureMove(new Vector2(0, -1), true),
+                new FigureMove(new Vector2(-1, -1), true),
+                new FigureMove(new Vector2(-1, 0), true),
+                new FigureMove(new Vector2(-1, 1), true),
+                new FigureMove(new Vector2(0, 1), true)
+            };
         }
         public override FigureType GetFigureType()
         {

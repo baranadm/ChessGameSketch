@@ -14,7 +14,7 @@ namespace ChessGameSketch
             this.Player = player;
         }
 
-        public abstract FigureMoves GetFigureMoves();
+        public abstract List<FigureMove> GetFigureMoves();
         public abstract FigureType GetFigureType();
         public abstract Figure GetCopy();
 
