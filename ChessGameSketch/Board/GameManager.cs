@@ -7,8 +7,7 @@ namespace ChessGameSketch
 
         public List<Vector2> GetAllowedMoves(Board board, Figure figureInspected)
         {
-            List<Vector2> possibleMoves = new List<Vector2>();
-            possibleMoves.AddRange(GetAccessiblePositions(figureInspected, board));
+            List<Vector2> possibleMoves = GetAccessiblePositions(figureInspected, board);
 
             List<Vector2> movesCausingCheck = new List<Vector2>();
 
@@ -36,47 +35,26 @@ namespace ChessGameSketch
             return possibleMoves;
         }
 
-        private List<Vector2> GetAccessiblePositions(Figure figureInspected, Board board)
+        private List<Vector2> GetAccessiblePositions(Figure inspectedFigure, Board board)
         {
-            List<FigureMove> figureMoves = figureInspected.GetFigureMoves();
-
-            Pawn? pawn = figureInspected.GetFigureType().Equals(FigureType.Pawn) ? (Pawn)figureInspected : null;
-            if (pawn != null)
-            {
-                
-                foreach (FigureMove attackMove in pawn.GetAttackMoves())
-                {
-                    Vector2 positionUnderAttack = Vector2.Add(pawn.Position, attackMove.Direction);
-                    Figure? figureUnderAttack = board.FigureOn(positionUnderAttack);
-                    if (figureUnderAttack != null && !figureUnderAttack.SamePlayerAs(pawn))
-                    {
-                        figureMoves.Add(attackMove);
-                    } else if (board.EnPassantField == positionUnderAttack)
-                    {
-                        figureMoves.Add(attackMove);
-                    }
-                }
-            }
+            List<FigureMove> inspectedFigureMoves = AvailableMovesFor(inspectedFigure, board);
 
             List<Vector2> accessiblePositions = new List<Vector2>();
-            for (int i = 0; i < figureMoves.Count; i++)
+            foreach(FigureMove actualMove in inspectedFigureMoves)
             {
-                FigureMove actualMove = figureMoves[i];
-                Vector2 actualPosition = figureInspected.Position;
+                Vector2 actualPosition = inspectedFigure.Position;
 
                 while (true)
                 {
                     Vector2 nextPosition = Vector2.Add(actualPosition, actualMove.Direction);
 
-                    bool outOfBounds = nextPosition.X < 0 || nextPosition.X > 7 || nextPosition.Y < 0 || nextPosition.Y > 7;
-                    if (outOfBounds) break;
+                    if (IsOutOfBounds(nextPosition)) break;
 
                     //break if next tile is occupied by another figure with same color (player)
                     Figure? figureOnNextPosition = board.FigureOn(nextPosition);
                     if (figureOnNextPosition != null)
                     {
-                        bool samePlayer = figureOnNextPosition.SamePlayerAs(figureInspected);
-                        if (samePlayer) break;
+                        if (figureOnNextPosition.SamePlayerAs(inspectedFigure)) break;
                         else
                         {
                             accessiblePositions.Add(nextPosition);
@@ -96,6 +74,40 @@ namespace ChessGameSketch
             }
 
             return accessiblePositions;
+        }
+
+        public static bool IsOutOfBounds(Vector2 nextPosition)
+        {
+            return nextPosition.X < 0 || nextPosition.X > 7 || nextPosition.Y < 0 || nextPosition.Y > 7;
+        }
+
+        private List<FigureMove> AvailableMovesFor(Figure inspectedFigure, Board board)
+        {
+            List<FigureMove> inspectedFigureMoves = inspectedFigure.GetFigureMoves();
+            if (inspectedFigure.IsType(FigureType.Pawn))
+            {
+                Pawn pawn = (Pawn) inspectedFigure;
+                inspectedFigureMoves.AddRange(GetPawnsPossibleAttackMoves(pawn, board));
+            }
+
+            return inspectedFigureMoves;
+        }
+
+        private List<FigureMove> GetPawnsPossibleAttackMoves(Pawn pawn, Board board)
+        {
+            List<FigureMove> pawnsAttackMoves = new List<FigureMove>();
+            foreach (FigureMove attackMove in pawn.GetAttackMoves())
+            {
+                Vector2 positionUnderAttack = Vector2.Add(pawn.Position, attackMove.Direction);
+                Figure? figureUnderAttack = board.FigureOn(positionUnderAttack);
+                
+                if (figureUnderAttack != null && !figureUnderAttack.SamePlayerAs(pawn)) 
+                    pawnsAttackMoves.Add(attackMove);
+
+                if (positionUnderAttack == board.EnPassantField)
+                    pawnsAttackMoves.Add(attackMove);
+            }
+            return pawnsAttackMoves;
         }
 
     }
