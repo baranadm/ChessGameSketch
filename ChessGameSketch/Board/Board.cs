@@ -41,7 +41,7 @@ namespace ChessGameSketch
 
         private void MarkEnPassantIfRequired(Figure figure, Vector2 newPosition)
         {
-            if(figure.GetFigureType() == FigureType.Pawn)
+            if(figure.FigureType() == FigureType.Pawn)
                 if(Vector2.Distance(figure.Position, newPosition) == 2)
                     EnPassantField = Vector2.Divide(Vector2.Add(figure.Position, newPosition), new Vector2(0, 2));
         }
@@ -62,7 +62,7 @@ namespace ChessGameSketch
 
         public List<Figure> FindAll(FigureType type, Player player)
         {
-            return FiguresOnBoard.FindAll(fig => fig.GetFigureType().Equals(type) && fig.Player == player);
+            return FiguresOnBoard.FindAll(fig => fig.FigureType().Equals(type) && fig.Player == player);
         }
 
         public Board GetCopy()
