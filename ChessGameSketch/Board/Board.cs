@@ -4,6 +4,7 @@ namespace ChessGameSketch
 {
     public class Board
     {
+        public Vector2? EnPassantField { get; set; }
         public List<Figure> FiguresOnBoard { get; set; }
 
         public Board()
@@ -23,9 +24,28 @@ namespace ChessGameSketch
         
         public void MoveFigure(Figure figure, Vector2 newPosition)
         {
+            HandleEnPassantField(figure, newPosition);
             figure.Position = newPosition;
         }
-        
+
+        private void HandleEnPassantField(Figure figure, Vector2 newPosition)
+        {
+            ClearEnPassantField();
+            MarkEnPassantIfRequired(figure, newPosition);
+        }
+
+        private void ClearEnPassantField()
+        {
+            EnPassantField = null;
+        }
+
+        private void MarkEnPassantIfRequired(Figure figure, Vector2 newPosition)
+        {
+            if(figure.GetFigureType() == FigureType.Pawn)
+                if(Vector2.Distance(figure.Position, newPosition) == 2)
+                    EnPassantField = Vector2.Divide(Vector2.Add(figure.Position, newPosition), new Vector2(0, 2));
+        }
+
         public void DeleteFigure(Figure figure)
         {
             FiguresOnBoard.Remove(figure);

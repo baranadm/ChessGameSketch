@@ -45,11 +45,15 @@ namespace ChessGameSketch
             Pawn? pawn = figureInspected.GetFigureType().Equals(FigureType.Pawn) ? (Pawn)figureInspected : null;
             if (pawn != null)
             {
+                
                 foreach (FigureMove attackMove in pawn.GetAttackMoves())
                 {
                     Vector2 positionUnderAttack = Vector2.Add(pawn.Position, attackMove.Direction);
                     Figure? figureUnderAttack = board.FigureOn(positionUnderAttack);
                     if (figureUnderAttack != null && !figureUnderAttack.SamePlayerAs(pawn))
+                    {
+                        figureMoves.Add(attackMove);
+                    } else if (board.EnPassantField == positionUnderAttack)
                     {
                         figureMoves.Add(attackMove);
                     }

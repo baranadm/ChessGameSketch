@@ -1,11 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using FluentAssertions;
 
 namespace ChessGameSketch
 {
@@ -53,7 +49,7 @@ namespace ChessGameSketch
         {
             // Arrange
             Board board = new Board();
-            
+
             Pawn pawn = new Pawn(new Vector2(0, 7), Player.White);
             board.PutFigure(pawn);
 
@@ -69,10 +65,10 @@ namespace ChessGameSketch
         {
             // Arrange
             Board board = new Board();
-            
+
             Pawn pawn = new Pawn(new Vector2(0, 3), Player.White);
             board.PutFigure(pawn);
-            
+
             Bishop bishop = new Bishop(new Vector2(0, 4), Player.White);
             board.PutFigure(bishop);
 
@@ -88,7 +84,7 @@ namespace ChessGameSketch
         {
             // Arrange
             Board board = new Board();
-            
+
             Bishop bishop = new Bishop(new Vector2(2, 0), Player.White);
             board.PutFigure(bishop);
 
@@ -322,7 +318,7 @@ namespace ChessGameSketch
             List<Vector2> result = underTest.GetAllowedMoves(board, whiteKing);
 
             // Assert
-            List<Vector2> expected = new List<Vector2>() { 
+            List<Vector2> expected = new List<Vector2>() {
                 new Vector2(0, 5),
                 new Vector2(1, 5),
                 new Vector2(0, 3),
@@ -347,7 +343,7 @@ namespace ChessGameSketch
             List<Vector2> result = underTest.GetAllowedMoves(board, blackKing);
 
             // Assert
-            List<Vector2> expected = new List<Vector2>() { 
+            List<Vector2> expected = new List<Vector2>() {
                 new Vector2(0, 5),
                 new Vector2(1, 5),
                 new Vector2(0, 3),
@@ -400,6 +396,29 @@ namespace ChessGameSketch
                 new Vector2(4, 5),
                 new Vector2(3, 5),
                 new Vector2(5, 5),
+            };
+            result.Should().BeEquivalentTo(expected);
+        }
+
+        [TestMethod]
+        public void GetAllowedMoves_ForBlackPawn_WhenWhitePawnMovedTwoFieldsAndEnPassantPossible_ReturnsCorrectMoves()
+        {
+            // Arrange
+            Board board = new Board();
+
+            Pawn whitePawn = new Pawn(new Vector2(3, 3), Player.White);
+            board.PutFigure(whitePawn);
+            board.EnPassantField = new Vector2(3, 1);
+
+            Pawn blackPawn = new Pawn(new Vector2(2, 2), Player.Black);
+            board.PutFigure(blackPawn);
+            // Act
+            List<Vector2> result = underTest.GetAllowedMoves(board, blackPawn);
+
+            // Assert
+            List<Vector2> expected = new List<Vector2>() {
+                new Vector2(2, 1),
+                new Vector2(3, 1),
             };
             result.Should().BeEquivalentTo(expected);
         }
