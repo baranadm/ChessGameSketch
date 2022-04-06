@@ -7,7 +7,7 @@ namespace ChessGameSketch
     {
         public Rook(Vector2 position, Player player) : base(position, player)
         {
-            sign = 'I';
+            Sign = 'I';
         }
 
         public override PossibleMoves GetPossibleMoves()

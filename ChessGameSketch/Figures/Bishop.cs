@@ -7,7 +7,7 @@ namespace ChessGameSketch
     {
         public Bishop(Vector2 position, Player player) : base(position, player)
         {
-            sign = 'A';
+            Sign = 'A';
         }
 
         public override PossibleMoves GetPossibleMoves()
