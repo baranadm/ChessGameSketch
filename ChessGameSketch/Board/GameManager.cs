@@ -36,8 +36,6 @@ namespace ChessGameSketch
             return possibleMoves;
         }
 
-
-
         private List<Vector2> GetAccessiblePositions(Figure figureInspected, Board board)
         {
             List<FigureMove> figureMoves = figureInspected.GetFigureMoves();
