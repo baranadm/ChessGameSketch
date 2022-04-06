@@ -253,54 +253,6 @@ namespace ChessGameSketch
             };
             result.Should().BeEquivalentTo(expected);
         }
-        //TODO move to Board tests
-        //[TestMethod]
-        //public void PutFigure_AddsFigureToList_AndPutsFigureOnTile()
-        //{
-        //    // Arrange
-        //    Board board = new Board();
-        //    Rook rook = new Rook(new Vector2(3, 3), Player.White);
-
-        //    // Act
-        //    board.PutFigure(rook);
-
-        //    // Assert
-        //    underTest.FigureAt(rook.Position).Should().Be(rook);
-        //}
-
-        //[TestMethod]
-        //public void MoveFigure_UpdatesFiguresPositionInList_AndUpdatesTiles()
-        //{
-        //    // Arrange
-        //    Board board = new Board();
-        //    Vector2 initialPosition = new Vector2(3, 3);
-        //    Rook rook = new Rook(initialPosition, Player.White);
-        //    board.PutFigure(rook);
-
-        //    // Act
-        //    Vector2 newPosition = new Vector2(4, 4);
-        //    board.MoveFigure(rook, newPosition);
-
-        //    // Assert
-        //    board.FiguresOnBoard.Find(new Predicate<Figure>(fig => fig.Equals(rook))).position.Equals(newPosition);
-        //    underTest.FigureAt(initialPosition).Should().BeNull();
-        //    underTest.FigureAt(newPosition).Should().Be(rook);
-        //}
-
-        //[TestMethod]
-        //public void DeleteFigure_RemovesFigureFromList_AndFromTiles()
-        //{
-        //    // Arrange
-        //    Board board = new Board();
-        //    Rook rook = new Rook(new Vector2(3, 3), Player.White);
-        //    board.PutFigure(rook);
-
-        //    // Act
-        //    board.DeleteFigure(rook);
-
-        //    // Assert
-        //    underTest.FigureAt(rook.Position).Should().BeNull();
-        //}
 
         [TestMethod]
         public void GetAllowedMoves_ForWhiteKing_WhenBlackRookAttacksKing_ReturnsCorrectMoves()
@@ -419,6 +371,31 @@ namespace ChessGameSketch
             List<Vector2> expected = new List<Vector2>() {
                 new Vector2(2, 1),
                 new Vector2(3, 1),
+            };
+            result.Should().BeEquivalentTo(expected);
+        }
+
+        [TestMethod]
+        public void GetAllowedMoves_ForWhiteRook_WhenWhiteKingIsChecked_ReturnsCorrectMoves()
+        {
+            // Arrange
+            Board board = new Board();
+
+            King whiteKing = new King(new Vector2(2, 1), Player.White);
+            board.PutFigure(whiteKing);
+
+            Rook whiteRook = new Rook(new Vector2(6, 3), Player.White);
+            board.PutFigure(whiteRook);
+
+            Rook blackRook = new Rook(new Vector2(2, 6), Player.Black);
+            board.PutFigure(blackRook);
+
+            // Act
+            List<Vector2> result = underTest.GetAllowedMoves(board, whiteRook);
+
+            // Assert
+            List<Vector2> expected = new List<Vector2>() {
+                new Vector2(2, 3),
             };
             result.Should().BeEquivalentTo(expected);
         }
