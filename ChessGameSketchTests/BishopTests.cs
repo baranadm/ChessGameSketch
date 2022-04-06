@@ -17,20 +17,18 @@ namespace ChessGameSketch
             Bishop bishop = new Bishop(new Vector2(0, 0), Player.White);
 
             // Act
-            FigureMoves possibleMoves = bishop.GetFigureMoves();
+            List<FigureMove> possibleMoves = bishop.GetFigureMoves();
 
             // Assert
-            FigureMoves expected = new FigureMoves(new List<Vector2>()
+            List<FigureMove> expected = new List<FigureMove>()
             {
-                new Vector2(1,1),
-                new Vector2(-1,1),
-                new Vector2(1,-1),
-                new Vector2(-1,-1)
-            },
-            true);
+                new FigureMove(new Vector2(1,1), true),
+                new FigureMove(new Vector2(-1,1), true),
+                new FigureMove(new Vector2(1,-1), true),
+                new FigureMove(new Vector2(-1,-1), true)
+            };
 
-            possibleMoves.Directions.Should().BeEquivalentTo(expected.Directions);
-            possibleMoves.Repeatable.Should().Be(expected.Repeatable);
+            possibleMoves.Should().BeEquivalentTo(expected);
         }
     }
 }
