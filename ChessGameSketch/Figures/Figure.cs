@@ -15,9 +15,8 @@ namespace ChessGameSketch
         }
 
         public abstract List<FigureMove> GetFigureMoves();
-        public abstract FigureType GetFigureType();
+        public abstract FigureType FigureType();
         public abstract Figure GetCopy();
-
         public void UpdatePosition(Vector2 newPosition)
         {
             this.Position = newPosition;
@@ -26,6 +25,11 @@ namespace ChessGameSketch
         public bool SamePlayerAs(Figure other)
         {
             return other.Player.Equals(Player);
+        }
+
+        public bool IsType(FigureType type)
+        {
+            return FigureType().Equals(type);
         }
 
         public override int GetHashCode()
