@@ -7,12 +7,11 @@ namespace ChessGameSketch
     {
         public Bishop(Vector2 position, Player player) : base(position, player)
         {
-            Sign = 'A';
         }
 
-        public override PossibleMoves GetPossibleMoves()
+        public override FigureMoves GetFigureMoves()
         {
-            return new PossibleMoves(new List<Vector2>()
+            return new FigureMoves(new List<Vector2>()
             {
                 new Vector2(1, 1),
                 new Vector2(-1,1),
@@ -21,6 +20,17 @@ namespace ChessGameSketch
             }, 
             true);
         }
+
+        public override FigureType GetFigureType()
+        {
+            return FigureType.Bishop;
+        }
+        public override Bishop GetCopy()
+        {
+            return new Bishop(new Vector2(Position.X, Position.Y), Player);
+        }
+
+
     }
 
 }

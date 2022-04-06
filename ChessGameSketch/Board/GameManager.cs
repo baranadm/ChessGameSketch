@@ -4,87 +4,99 @@ namespace ChessGameSketch
 {
     public class GameManager
     {
-        private Board Board { get; set; }
 
-        public GameManager(Board board)
+        public List<Vector2> GetAllowedMoves(Board board, Figure figureInspected)
         {
-            this.Board = board;
+            List<Vector2> possibleMoves = new List<Vector2>();
+            possibleMoves.AddRange(GetAttackedFields(figureInspected, board));
+            
+            List<Vector2> movesCausingCheck = new List<Vector2>();
+
+            // if current player has king on the board, simulate every move and dismiss every move, that causes check on king
+            // check, if there are player's kings
+            List<Figure> friendlyKings = board.FindAll(FigureType.King, figureInspected.Player);
+            if (friendlyKings.Any())
+            {
+                Player opponent = figureInspected.Player.Equals(Player.White) ? Player.Black : Player.White;
+
+                foreach(Vector2 possibleMove in possibleMoves)
+                {
+                    Board simulatedBoard = board.GetCopy();
+                    List<Figure> simulatedOpponentsFigures = simulatedBoard.FindAll(opponent);
+                    Figure? simulatedFigureInspected = simulatedBoard.FigureOn(figureInspected.Position);
+
+                    simulatedBoard.MoveFigure(simulatedFigureInspected, possibleMove);
+                    List<Figure> simulatedFriendlyKings = simulatedBoard.FindAll(FigureType.King,figureInspected.Player);
+                    List<Vector2> simulatedFriendlyKingsPositions = simulatedFriendlyKings.Select(king => king.Position).ToList();
+
+                    bool isAnyKingChecked = simulatedOpponentsFigures.Exists(fig => GetAttackedFields(fig, simulatedBoard).Exists(field => simulatedFriendlyKingsPositions.Contains(field)));
+                    if(isAnyKingChecked) movesCausingCheck.Add(possibleMove);
+                }
+            }
+
+            possibleMoves.RemoveAll(move => movesCausingCheck.Contains(move));
+            return possibleMoves;
         }
 
-        public List<Vector2> GetAllowedMoves(List<Figure> allFiguresAtBoard, Figure figureInspected)
-        {
-            PossibleMoves possibleMoves = figureInspected.GetPossibleMoves();
 
-            List<Vector2> allowedMoves = new List<Vector2>();
-            for (int i = 0; i < possibleMoves.Directions.Count; i++)
+
+        private List<Vector2> GetAttackedFields(Figure figureInspected, Board board)
+        {
+            FigureMoves figureMoves = figureInspected.GetFigureMoves();
+            List<Vector2> figureMovesDirections = figureMoves.Directions;
+
+            Pawn? pawn = figureInspected.GetFigureType().Equals(FigureType.Pawn) ? (Pawn) figureInspected : null;
+            if (pawn != null)
             {
+                foreach(Vector2 attackDirection in pawn.GetAttackDirections().Directions)
+                {
+                    Vector2 possibleAttackField = Vector2.Add(pawn.Position, attackDirection);
+                    Figure? possibleFigureAttacked = board.FigureOn(possibleAttackField);
+                    if (!possibleFigureAttacked.SamePlayerAs(pawn))
+                    {
+                        figureMovesDirections.Add(attackDirection);
+                    }
+                }                
+            }
+            List<Vector2> attackedFields = new List<Vector2>();
+            for (int i = 0; i < figureMovesDirections.Count; i++)
+            {
+                Vector2 actualDirection = figureMovesDirections[i];
                 Vector2 actualPosition = figureInspected.Position;
-                Vector2 actualDirection = possibleMoves.Directions[i];
 
                 while (true)
                 {
-                    Vector2 nextPositionInActualDirection = Vector2.Add(actualPosition, actualDirection);
+                    Vector2 nextPosition = Vector2.Add(actualPosition, actualDirection);
 
-                    bool outOfBounds = nextPositionInActualDirection.X < 0 || nextPositionInActualDirection.X > 7 || nextPositionInActualDirection.Y < 0 || nextPositionInActualDirection.Y > 7;
+                    bool outOfBounds = nextPosition.X < 0 || nextPosition.X > 7 || nextPosition.Y < 0 || nextPosition.Y > 7;
                     if (outOfBounds) break;
 
                     //break if next tile is occupied by another figure with same color (player)
-                    Figure? figureOnNextPosition = FigureAt(nextPositionInActualDirection);
-                    bool samePlayerOnNextPosition = ( figureOnNextPosition == null ) ? false: figureOnNextPosition.SamePlayerAs(figureInspected);
-                    if (samePlayerOnNextPosition) break;
-
-                    // if there is king of figure's player on the board, check, if it will not be checked after taking a move
-                    King? king = (King) allFiguresAtBoard.Find(fig => fig.GetType().Name.Equals("King") && fig.Player.Equals(figureInspected.Player));
-                    if (king != null)
+                    Figure? figureOnNextPosition = board.FigureOn(nextPosition);
+                    if (figureOnNextPosition != null)
                     {
-                        //Board.MoveFigure(figure, nextPosition);
-                        figureInspected.UpdatePosition(nextPositionInActualDirection);
-                        Boolean isKingChecked = IsChecked(king);
-                        //Board.MoveFigure(figure, actualPosition);
-                        figureInspected.UpdatePosition(actualPosition);
-                        if (isKingChecked) break;
-                        if (!isKingChecked) allowedMoves.Add(nextPositionInActualDirection);
-                    }
-
-                    // if next tile is occupied by another figure of another color (different player), add this tile to possible moves (taking a figure) and break
-                    if (samePlayerOnNextPosition != null && !samePlayerOnNextPosition.Player.Equals(figureInspected.Player))
+                        bool samePlayer = figureOnNextPosition.SamePlayerAs(figureInspected);
+                        if (samePlayer) break;
+                        else
+                        {
+                            attackedFields.Add(nextPosition);
+                            break;
+                        }
+                    } else
                     {
-                        allowedMoves.Add(nextPositionInActualDirection);
-                        break;
-                    }
-
-                    // if next positions tile is free, then add next tile to possible moves and proceed to to next tile
-                    if (FigureAt(nextPositionInActualDirection) == null)
-                    {
-                        allowedMoves.Add(nextPositionInActualDirection);
-                        actualPosition.X = nextPositionInActualDirection.X;
-                        actualPosition.Y = nextPositionInActualDirection.Y;
+                        attackedFields.Add(nextPosition);
+                        actualPosition.X = nextPosition.X;
+                        actualPosition.Y = nextPosition.Y;
+                        //board.MoveFigure(figureInspected, nextPosition);
                     }
 
                     // break if move is not repetable
-                    if (!possibleMoves.Repeatable) break;
+                    if (!figureMoves.Repeatable) break;
                 }
-
             }
-            return allowedMoves;
+
+            return attackedFields;
         }
 
-        //TODO this method should be private
-        public bool IsChecked(King king)
-        {
-            List<Figure> figuresWithoutKing = Board.FiguresAtBoard.FindAll(fig => !fig.Equals(king));
-            Console.WriteLine(figuresWithoutKing.ToArray().ToString());
-            foreach (Figure figure in figuresWithoutKing)
-            {
-                if (!figure.Player.Equals(king.Player) &&
-                    GetAllowedMoves(figuresWithoutKing, figure).Contains(king.Position)) return true;
-            }
-            return false;
-        }
-
-        public Figure? FigureAt(Vector2 position)
-        {
-            return Board.FiguresAtBoard.Find(fig => fig.Position.Equals(position));
-        }
     }
 }

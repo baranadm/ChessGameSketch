@@ -7,11 +7,10 @@ namespace ChessGameSketch
     {
         public Queen(Vector2 position, Player player) : base(position, player)
         {
-            Sign = '@';
         }
-        public override PossibleMoves GetPossibleMoves()
+        public override FigureMoves GetFigureMoves()
         {
-            return new PossibleMoves(new List<Vector2>()
+            return new FigureMoves(new List<Vector2>()
             {
                 new Vector2(1, 1),
                 new Vector2(1, 0),
@@ -23,6 +22,14 @@ namespace ChessGameSketch
                 new Vector2(0, 1)
             },
             true);
+        }
+        public override FigureType GetFigureType()
+        {
+            return FigureType.Queen;
+        }
+        public override Queen GetCopy()
+        {
+            return new Queen(new Vector2(Position.X, Position.Y), Player);
         }
     }
 }

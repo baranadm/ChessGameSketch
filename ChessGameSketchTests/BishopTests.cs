@@ -17,10 +17,10 @@ namespace ChessGameSketch
             Bishop bishop = new Bishop(new Vector2(0, 0), Player.White);
 
             // Act
-            PossibleMoves possibleMoves = bishop.GetPossibleMoves();
+            FigureMoves possibleMoves = bishop.GetFigureMoves();
 
             // Assert
-            PossibleMoves expected = new PossibleMoves(new List<Vector2>()
+            FigureMoves expected = new FigureMoves(new List<Vector2>()
             {
                 new Vector2(1,1),
                 new Vector2(-1,1),

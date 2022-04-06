@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace ChessGameSketch
 {
-    public class PossibleMoves
+    public class FigureMoves
     {
         private readonly List<Vector2> directions;
         private readonly bool repeatable;
 
-        public PossibleMoves(List<Vector2> directions, bool repeatable)
+        public FigureMoves(List<Vector2> directions, bool repeatable)
         {
             this.directions = directions;
             this.repeatable = repeatable;
@@ -23,7 +23,7 @@ namespace ChessGameSketch
 
         public override bool Equals(object? obj)
         {
-            return obj is PossibleMoves moves &&
+            return obj is FigureMoves moves &&
                    EqualityComparer<List<Vector2>>.Default.Equals(directions, moves.directions) &&
                    repeatable == moves.repeatable;
         }
