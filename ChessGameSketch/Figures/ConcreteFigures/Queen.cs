@@ -22,9 +22,9 @@ namespace ChessGameSketch
                 new FigureMove(new Vector2(0, 1), true)
             };
         }
-        public override FigureType GetFigureType()
+        public override FigureType FigureType()
         {
-            return FigureType.Queen;
+            return ChessGameSketch.FigureType.Queen;
         }
         public override Queen GetCopy()
         {

@@ -19,9 +19,9 @@ namespace ChessGameSketch
                 new FigureMove(new Vector2(0, 1), true)
             };
         }
-        public override FigureType GetFigureType()
+        public override FigureType FigureType()
         {
-            return FigureType.Rook;
+            return ChessGameSketch.FigureType.Rook;
         }
         public override Rook GetCopy()
         {

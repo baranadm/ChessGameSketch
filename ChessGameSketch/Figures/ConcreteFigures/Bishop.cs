@@ -19,15 +19,14 @@ namespace ChessGameSketch
             };
         }
 
-        public override FigureType GetFigureType()
+        public override FigureType FigureType()
         {
-            return FigureType.Bishop;
+            return ChessGameSketch.FigureType.Bishop;
         }
         public override Bishop GetCopy()
         {
             return new Bishop(new Vector2(Position.X, Position.Y), Player);
         }
-
 
     }
 

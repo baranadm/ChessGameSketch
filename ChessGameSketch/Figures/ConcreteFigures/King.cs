@@ -24,9 +24,9 @@ namespace ChessGameSketch
             };
         }
 
-        public override FigureType GetFigureType()
+        public override FigureType FigureType()
         {
-            return FigureType.King;
+            return ChessGameSketch.FigureType.King;
         }
         public override King GetCopy()
         {

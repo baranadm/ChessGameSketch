@@ -47,9 +47,9 @@ namespace ChessGameSketch
             return moves;
         }
 
-        public override FigureType GetFigureType()
+        public override FigureType FigureType()
         {
-            return FigureType.Pawn;
+            return ChessGameSketch.FigureType.Pawn;
         }
         public override Pawn GetCopy()
         {

@@ -23,9 +23,9 @@ namespace ChessGameSketch
                 new FigureMove(new Vector2(-1,-2), false)
             };
         }
-        public override FigureType GetFigureType()
+        public override FigureType FigureType()
         {
-            return FigureType.Knight;
+            return ChessGameSketch.FigureType.Knight;
         }
         public override Knight GetCopy()
         {
