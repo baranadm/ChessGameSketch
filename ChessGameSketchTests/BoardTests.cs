@@ -1,17 +1,15 @@
 ﻿using ChessGameSketch;
+using ChessGameSketch.Exceptions;
+using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using FluentAssertions;
 
 namespace ChessGameSketchTests
 {
     [TestClass]
-    internal class BoardTests
+    public class BoardTests
     {
         Board underTest;
 
@@ -54,7 +52,7 @@ namespace ChessGameSketchTests
             underTest.PutFigure(queen);
 
             // Assert
-            //underTest.Invoking(b => b.PutFigure(queen)).Should().Throw<FieldOccupiedException>();
+            underTest.Invoking(b => b.PutFigure(queen)).Should().Throw<FieldOccupiedException>();
         }
 
         [TestMethod]
@@ -67,7 +65,7 @@ namespace ChessGameSketchTests
             underTest.PutFigure(queen);
 
             // Assert
-            //underTest.Invoking(b => b.PutFigure(queen)).Should().Throw<OutOfBoundsException>();
+            underTest.Invoking(b => b.PutFigure(queen)).Should().Throw<OutOfBoundsException>();
         }
 
         [TestMethod]
@@ -86,7 +84,7 @@ namespace ChessGameSketchTests
         }
 
         [TestMethod]
-        public void DeleteFigure_WhenFigureDoesNotExist_RemovesFigureFromList()
+        public void DeleteFigure_WhenFigureDoesNotExist_Throws()
         {
             // Arrange
             Board board = new Board();
@@ -98,26 +96,59 @@ namespace ChessGameSketchTests
             board.DeleteFigure(rook);
 
             // Assert
-            //underTest.Invoking(b => b.DeleteFigure(rook)).Should().Throw<FigureNotFoundException>();
+            underTest.Invoking(b => b.DeleteFigure(rook)).Should().Throw<FigureNotFoundException>();
         }
 
-        //[TestMethod]
-        //public void MoveFigure_UpdatesFiguresPositionInList_AndUpdatesTiles()
-        //{
-        //    // Arrange
-        //    Board board = new Board();
-        //    Vector2 initialPosition = new Vector2(3, 3);
-        //    Rook rook = new Rook(initialPosition, Player.White);
-        //    board.PutFigure(rook);
+        [TestMethod]
+        public void MoveFigure_UpdatesFiguresPositionInList()
+        {
+            // Arrange
+            Board board = new Board();
 
-        //    // Act
-        //    Vector2 newPosition = new Vector2(4, 4);
-        //    board.MoveFigure(rook, newPosition);
+            Vector2 initialPosition = new Vector2(3, 3);
+            Rook rook = new Rook(initialPosition, Player.White);
+            board.PutFigure(rook);
 
-        //    // Assert
-        //    board.FiguresOnBoard.Find(new Predicate<Figure>(fig => fig.Equals(rook))).position.Equals(newPosition);
-        //    underTest.FigureAt(initialPosition).Should().BeNull();
-        //    underTest.FigureAt(newPosition).Should().Be(rook);
-        //}
+            // Act
+            Vector2 newPosition = new Vector2(4, 4);
+            board.MoveFigure(rook, newPosition);
+
+            // Assert
+            underTest.FigureOn(initialPosition).Should().BeNull();
+            underTest.FigureOn(newPosition).Should().Be(rook);
+        }
+
+        [TestMethod]
+        public void MoveFigure_WhenFriendlyFigureOnNextPosition_Throw()
+        {
+            // Arrange
+            Board board = new Board();
+
+            Rook rook = new Rook(new Vector2(3, 3), Player.White);
+            board.PutFigure(rook);
+
+            Pawn pawn = new Pawn(new Vector2(5, 5), Player.White);
+            board.PutFigure(pawn);
+
+            // Act
+
+            // Assert
+            board.Invoking(b => b.MoveFigure(rook, pawn.Position)).Should().Throw<FieldOccupiedException>();
+        }
+
+        [TestMethod]
+        public void MoveFigure_WhenNoFigure_Throws()
+        {
+            // Arrange
+            Board board = new Board();
+
+            Rook rook = new Rook(new Vector2(3, 3), Player.White);
+            board.PutFigure(rook);
+
+            // Act
+
+            // Assert
+            board.Invoking(b => b.MoveFigure(rook, new Vector2(4, 5))).Should().Throw<FigureNotFoundException>();
+        }
     }
 }

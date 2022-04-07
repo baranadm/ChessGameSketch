@@ -1,9 +1,10 @@
-﻿using FluentAssertions;
+﻿using ChessGameSketch;
+using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace ChessGameSketch
+namespace ChessGameSketchTests
 {
     [TestClass]
     public class GameManagerTest

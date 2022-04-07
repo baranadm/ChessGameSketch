@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using FluentAssertions;
 
-namespace ChessGameSketch
+namespace ChessGameSketchTests
 {
     [TestClass]
     public class BishopTests
@@ -17,15 +17,15 @@ namespace ChessGameSketch
             Bishop bishop = new Bishop(new Vector2(0, 0), Player.White);
 
             // Act
-            List<FigureMove> possibleMoves = bishop.GetFigureMoves();
+            List<MoveDirection> possibleMoves = bishop.GetFigureMoves();
 
             // Assert
-            List<FigureMove> expected = new List<FigureMove>()
+            List<MoveDirection> expected = new List<MoveDirection>()
             {
-                new FigureMove(new Vector2(1,1), true),
-                new FigureMove(new Vector2(-1,1), true),
-                new FigureMove(new Vector2(1,-1), true),
-                new FigureMove(new Vector2(-1,-1), true)
+                new MoveDirection(new Vector2(1,1), true),
+                new MoveDirection(new Vector2(-1,1), true),
+                new MoveDirection(new Vector2(1,-1), true),
+                new MoveDirection(new Vector2(-1,-1), true)
             };
 
             possibleMoves.Should().BeEquivalentTo(expected);
