@@ -7,17 +7,15 @@ using System.Threading.Tasks;
 
 namespace ChessGameSketch
 {
-    public class FigureMove
+    public class MoveDirection
     {
-        public Vector2 Direction { get; }
+        public Vector2 Step { get; }
         public bool Repeatable { get; }
 
-        public FigureMove(Vector2 direction, bool repeatable)
+        public MoveDirection(Vector2 direction, bool repeatable)
         {
-            this.Direction = direction;
+            this.Step = direction;
             this.Repeatable = repeatable;
         }
-
     }
-
 }

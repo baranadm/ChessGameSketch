@@ -9,40 +9,40 @@ namespace ChessGameSketch
         {
         }
 
-        public override List<FigureMove> GetFigureMoves()
+        public override List<MoveDirection> GetFigureMoves()
         {
-            List<FigureMove> moves = new List<FigureMove>();
+            List<MoveDirection> moves = new List<MoveDirection>();
             
             if(Player == Player.White)
             {
-                moves.Add(new FigureMove(new Vector2(0, 1), false));
+                moves.Add(new MoveDirection(new Vector2(0, 1), false));
                 if(Position.Y==1)
                 {
-                    moves.Add(new FigureMove(new Vector2(0, 2), false));
+                    moves.Add(new MoveDirection(new Vector2(0, 2), false));
                 }
             } else
             {
-                moves.Add(new FigureMove(new Vector2(0, -1), false));
+                moves.Add(new MoveDirection(new Vector2(0, -1), false));
                 if(Position.Y==6)
                 {
-                    moves.Add(new FigureMove(new Vector2(0, -2), false));
+                    moves.Add(new MoveDirection(new Vector2(0, -2), false));
                 }
             }
 
             return moves;
         }
 
-        public List<FigureMove> GetAttackMoves()
+        public List<MoveDirection> GetAttackMoves()
         {
-            List<FigureMove> moves = new List<FigureMove>();
+            List<MoveDirection> moves = new List<MoveDirection>();
             if(Player == Player.White)
             {
-                moves.Add(new FigureMove(new Vector2(1, 1), false));
-                moves.Add(new FigureMove(new Vector2(-1, 1), false));
+                moves.Add(new MoveDirection(new Vector2(1, 1), false));
+                moves.Add(new MoveDirection(new Vector2(-1, 1), false));
             } else
             {
-                moves.Add(new FigureMove(new Vector2(1, -1), false));
-                moves.Add(new FigureMove(new Vector2(-1, -1), false));
+                moves.Add(new MoveDirection(new Vector2(1, -1), false));
+                moves.Add(new MoveDirection(new Vector2(-1, -1), false));
             }
             return moves;
         }
