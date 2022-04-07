@@ -37,71 +37,91 @@ namespace ChessGameSketch
 
         private List<Vector2> GetAccessiblePositions(Figure inspectedFigure, Board board)
         {
-            List<FigureMove> inspectedFigureMoves = AvailableMovesFor(inspectedFigure, board);
+            List<MoveDirection> inspectedFigureMoves = ContextDependentMovesFor(inspectedFigure, board);
 
             List<Vector2> accessiblePositions = new List<Vector2>();
-            foreach(FigureMove actualMove in inspectedFigureMoves)
+            foreach (MoveDirection actualDirection in inspectedFigureMoves)
             {
-                Vector2 actualPosition = inspectedFigure.Position;
-
-                while (true)
-                {
-                    Vector2 nextPosition = Vector2.Add(actualPosition, actualMove.Direction);
-
-                    if (IsOutOfBounds(nextPosition)) break;
-
-                    //break if next tile is occupied by another figure with same color (player)
-                    Figure? figureOnNextPosition = board.FigureOn(nextPosition);
-                    if (figureOnNextPosition != null)
-                    {
-                        if (figureOnNextPosition.SamePlayerAs(inspectedFigure)) break;
-                        else
-                        {
-                            accessiblePositions.Add(nextPosition);
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        accessiblePositions.Add(nextPosition);
-                        actualPosition.X = nextPosition.X;
-                        actualPosition.Y = nextPosition.Y;
-                    }
-
-                    // break if move is not repetable
-                    if (!actualMove.Repeatable) break;
-                }
+                accessiblePositions.AddRange(
+                    FindAccassiblePositionsInDirection(actualDirection, inspectedFigure, board));
             }
 
             return accessiblePositions;
         }
 
-        public static bool IsOutOfBounds(Vector2 nextPosition)
+        private List<Vector2> FindAccassiblePositionsInDirection(MoveDirection actualDirection, Figure inspectedFigure, Board board)
+        {
+            List<Vector2> result = new List<Vector2>();
+
+            Vector2 actualPosition = inspectedFigure.Position;
+            while (true)
+            {
+                Vector2 nextPosition = Vector2.Add(actualPosition, actualDirection.Step);
+
+                if (IsOutOfBounds(nextPosition)) break;
+                if (WillOverlapFriend(inspectedFigure, nextPosition, board)) break;
+                else if (WillOverlapOpponent(inspectedFigure, nextPosition, board))
+                {
+                    result.Add(nextPosition);
+                    break;
+                }
+                else
+                {
+                    result.Add(nextPosition);
+                    actualPosition.X = nextPosition.X;
+                    actualPosition.Y = nextPosition.Y;
+                }
+                if (!actualDirection.Repeatable) break;
+            }
+            return result;
+        }
+
+        public bool IsOutOfBounds(Vector2 nextPosition)
         {
             return nextPosition.X < 0 || nextPosition.X > 7 || nextPosition.Y < 0 || nextPosition.Y > 7;
         }
-
-        private List<FigureMove> AvailableMovesFor(Figure inspectedFigure, Board board)
+        
+        public bool WillOverlapFriend(Figure inspectedFigure, Vector2 desiredPosition, Board board)
         {
-            List<FigureMove> inspectedFigureMoves = inspectedFigure.GetFigureMoves();
+            Figure? figureOnDesiredPosition = board.FigureOn(desiredPosition);
+            if (figureOnDesiredPosition != null && figureOnDesiredPosition.SamePlayerAs(inspectedFigure))
+            {
+                return true;
+            }
+            return false;
+        }
+        
+        public bool WillOverlapOpponent(Figure inspectedFigure, Vector2 desiredPosition, Board board)
+        {
+            Figure? figureOnDesiredPosition = board.FigureOn(desiredPosition);
+            if (figureOnDesiredPosition != null && !figureOnDesiredPosition.SamePlayerAs(inspectedFigure))
+            {
+                return true;
+            }
+            return false;
+        }
+        
+        private List<MoveDirection> ContextDependentMovesFor(Figure inspectedFigure, Board board)
+        {
+            List<MoveDirection> inspectedFigureMoves = inspectedFigure.GetFigureMoves();
             if (inspectedFigure.IsType(FigureType.Pawn))
             {
-                Pawn pawn = (Pawn) inspectedFigure;
+                Pawn pawn = (Pawn)inspectedFigure;
                 inspectedFigureMoves.AddRange(GetPawnsPossibleAttackMoves(pawn, board));
             }
 
             return inspectedFigureMoves;
         }
 
-        private List<FigureMove> GetPawnsPossibleAttackMoves(Pawn pawn, Board board)
+        private List<MoveDirection> GetPawnsPossibleAttackMoves(Pawn pawn, Board board)
         {
-            List<FigureMove> pawnsAttackMoves = new List<FigureMove>();
-            foreach (FigureMove attackMove in pawn.GetAttackMoves())
+            List<MoveDirection> pawnsAttackMoves = new List<MoveDirection>();
+            foreach (MoveDirection attackMove in pawn.GetAttackMoves())
             {
-                Vector2 positionUnderAttack = Vector2.Add(pawn.Position, attackMove.Direction);
+                Vector2 positionUnderAttack = Vector2.Add(pawn.Position, attackMove.Step);
                 Figure? figureUnderAttack = board.FigureOn(positionUnderAttack);
-                
-                if (figureUnderAttack != null && !figureUnderAttack.SamePlayerAs(pawn)) 
+
+                if (figureUnderAttack != null && !figureUnderAttack.SamePlayerAs(pawn))
                     pawnsAttackMoves.Add(attackMove);
 
                 if (positionUnderAttack == board.EnPassantField)
