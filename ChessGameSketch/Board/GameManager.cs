@@ -11,7 +11,7 @@ namespace ChessGameSketch
 
             List<Vector2> movesCausingCheck = new List<Vector2>();
 
-            List<Figure> friendlyKings = board.FindAll(FigureType.King, figureInspected.Player);
+            List<Figure> friendlyKings = board.FindPlayersFiguresWithType(FigureType.King, figureInspected.Player);
             if (friendlyKings.Any())
             {
                 Player opponent = figureInspected.Player.Equals(Player.White) ? Player.Black : Player.White;
@@ -19,11 +19,11 @@ namespace ChessGameSketch
                 foreach (Vector2 possibleMove in possibleMoves)
                 {
                     Board simulatedBoard = board.GetCopy();
-                    List<Figure> simulatedOpponentsFigures = simulatedBoard.FindAll(opponent);
+                    List<Figure> simulatedOpponentsFigures = simulatedBoard.FindPlayersFigures(opponent);
                     Figure? simulatedFigureInspected = simulatedBoard.FigureOn(figureInspected.Position);
 
                     simulatedBoard.MoveFigure(simulatedFigureInspected, possibleMove);
-                    List<Figure> simulatedFriendlyKings = simulatedBoard.FindAll(FigureType.King, figureInspected.Player);
+                    List<Figure> simulatedFriendlyKings = simulatedBoard.FindPlayersFiguresWithType(FigureType.King, figureInspected.Player);
                     List<Vector2> simulatedFriendlyKingsPositions = simulatedFriendlyKings.Select(king => king.Position).ToList();
 
                     bool isAnyKingChecked = simulatedOpponentsFigures.Exists(fig => GetAccessiblePositions(fig, simulatedBoard).Exists(field => simulatedFriendlyKingsPositions.Contains(field)));

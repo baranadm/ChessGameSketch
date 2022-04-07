@@ -11,28 +11,39 @@ namespace ChessGameSketchTests
     [TestClass]
     public class BoardTests
     {
-        Board underTest;
 
-        [TestInitialize]
-        public void TestInitialize()
+        [TestMethod]
+        public void FigureOn_WhenFigureFound_ReturnsCorrectFigure()
         {
-            List<Figure> initialFigures = new List<Figure>()
-            {
-                new Pawn(new Vector2(0, 4), Player.White),
-                new Bishop(new Vector2(1, 1), Player.White),
 
-                new Pawn(new Vector2(1, 4), Player.Black),
-                new Rook(new Vector2(7, 7), Player.Black)
-            };
+            // Arrange
+            Board underTest = new Board();
+            Pawn pawn = new Pawn(new Vector2(0, 4), Player.White);
+            underTest.PutFigure(pawn);
 
-            underTest = new Board(initialFigures);
-            underTest.EnPassantField = new Vector2(1, 5);
+            // Act
+
+            // Assert
+            underTest.FigureOn(pawn.Position).Should().Be(pawn);
+        }
+
+        [TestMethod]
+        public void FigureOn_WhenFigureNotFound_ReturnsNull()
+        {
+            // Arrange
+            Board underTest = new Board();
+
+            // Act
+
+            // Assert
+            underTest.FigureOn(new Vector2(0, 0)).Should().BeNull();
         }
 
         [TestMethod]
         public void PutFigure_OnEmptyField_AddsFigureToList()
         {
             // Arrange
+            Board underTest = new Board();
             Queen queen = new Queen(new Vector2(3, 3), Player.Black);
 
             // Act
@@ -46,6 +57,7 @@ namespace ChessGameSketchTests
         public void PutFigure_OnOccupiedField_ThrowsException()
         {
             // Arrange
+            Board underTest = new Board();
             Queen queen = new Queen(new Vector2(7, 7), Player.Black);
 
             // Act
@@ -59,13 +71,19 @@ namespace ChessGameSketchTests
         public void PutFigure_OnOuterField_ThrowsException()
         {
             // Arrange
-            Queen queen = new Queen(new Vector2(7, 8), Player.Black);
+            Board underTest = new Board();
+            Queen tooLowX = new Queen(new Vector2(-1, 7), Player.Black);
+            Queen tooBigX = new Queen(new Vector2(9, 0), Player.Black);
+            Queen tooLowY = new Queen(new Vector2(0, -1), Player.Black);
+            Queen tooBigY = new Queen(new Vector2(7, 8), Player.Black);
 
             // Act
-            underTest.PutFigure(queen);
 
             // Assert
-            underTest.Invoking(b => b.PutFigure(queen)).Should().Throw<OutOfBoundsException>();
+            underTest.Invoking(b => b.PutFigure(tooLowX)).Should().Throw<OutOfBoundsException>();
+            underTest.Invoking(b => b.PutFigure(tooBigX)).Should().Throw<OutOfBoundsException>();
+            underTest.Invoking(b => b.PutFigure(tooLowY)).Should().Throw<OutOfBoundsException>();
+            underTest.Invoking(b => b.PutFigure(tooBigY)).Should().Throw<OutOfBoundsException>();
         }
 
         [TestMethod]
@@ -80,7 +98,7 @@ namespace ChessGameSketchTests
             board.DeleteFigure(rook);
 
             // Assert
-            underTest.FiguresOnBoard.Should().NotContain(rook);
+            board.FiguresOnBoard.Should().NotContain(rook);
         }
 
         [TestMethod]
@@ -96,7 +114,7 @@ namespace ChessGameSketchTests
             board.DeleteFigure(rook);
 
             // Assert
-            underTest.Invoking(b => b.DeleteFigure(rook)).Should().Throw<FigureNotFoundException>();
+            board.Invoking(b => b.DeleteFigure(rook)).Should().Throw<FigureNotFoundException>();
         }
 
         [TestMethod]
@@ -114,8 +132,8 @@ namespace ChessGameSketchTests
             board.MoveFigure(rook, newPosition);
 
             // Assert
-            underTest.FigureOn(initialPosition).Should().BeNull();
-            underTest.FigureOn(newPosition).Should().Be(rook);
+            board.FigureOn(initialPosition).Should().BeNull();
+            board.FigureOn(newPosition).Should().Be(rook);
         }
 
         [TestMethod]
@@ -142,13 +160,25 @@ namespace ChessGameSketchTests
             // Arrange
             Board board = new Board();
 
-            Rook rook = new Rook(new Vector2(3, 3), Player.White);
-            board.PutFigure(rook);
-
             // Act
 
             // Assert
-            board.Invoking(b => b.MoveFigure(rook, new Vector2(4, 5))).Should().Throw<FigureNotFoundException>();
+            board.Invoking(b => b.MoveFigure(new Rook(new Vector2(3, 3), Player.White), new Vector2(4, 5))).Should().Throw<FigureNotFoundException>();
+        }
+
+        public void InitBoardForEnPassantTests()
+        {
+            List<Figure> initialFigures = new List<Figure>()
+            {
+                new Pawn(new Vector2(0, 4), Player.White),
+                new Bishop(new Vector2(1, 1), Player.White),
+
+                new Pawn(new Vector2(1, 4), Player.Black),
+                new Rook(new Vector2(7, 7), Player.Black)
+            };
+
+            Board underTest = new Board(initialFigures);
+            underTest.EnPassantField = new Vector2(1, 5);
         }
     }
 }
