@@ -8,8 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
-//builder.Services.AddSingleton<IFigureRepository, InMemFigureRepository>();
+builder.Services.AddControllers(options => options.SuppressAsyncSuffixInActionNames = false);
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
 builder.Services.AddSingleton<MongoDBFiguresRepository>();
 builder.Services.AddSingleton<IFigureRepository, MongoDBFiguresRepository>();

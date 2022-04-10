@@ -19,17 +19,18 @@ namespace ChessGameApi.Controllers
 
         //GET /chess
         [HttpGet]
-        public IEnumerable<FigureDto> GetFigures()
+        public async Task <IEnumerable<FigureDto>> GetFiguresAsync()
         {
-            var figures = figureRepository.GetFigures().Select(fig => fig.AsDto());
+            var figures = (await figureRepository.GetFiguresAsync())
+                .Select(fig => fig.AsDto());
             return figures;
         }
 
         //GET /chess/{id}
         [HttpGet("{id}")]
-        public ActionResult<FigureDto> GetFigure(Guid id)
+        public async Task<ActionResult<FigureDto>> GetFigureAsync(Guid id)
         {
-            var figure = figureRepository.GetFigure(id);
+            var figure = await figureRepository.GetFigureAsync(id);
             if (figure is null)
             {
                 return NotFound();
@@ -39,7 +40,7 @@ namespace ChessGameApi.Controllers
 
         // POST /chess
         [HttpPost]
-        public ActionResult<FigureDto> CreateFigure(CreateFigureDto newFigureDto)
+        public async Task<ActionResult<FigureDto>> CreateFigureAsync(CreateFigureDto newFigureDto)
         {
             FigureEntity figureEntity = new()
             {
@@ -50,15 +51,15 @@ namespace ChessGameApi.Controllers
                 FigureType = newFigureDto.FigureType
             };
 
-            figureRepository.CreateFigure(figureEntity);
-            return CreatedAtAction(nameof(GetFigure), new { id = figureEntity.Id }, figureEntity.AsDto());
+            await figureRepository.CreateFigureAsync(figureEntity);
+            return CreatedAtAction(nameof(GetFigureAsync), new { id = figureEntity.Id }, figureEntity.AsDto());
         }
 
         // PUT /chess/{id}
         [HttpPut("{id}")]
-        public ActionResult UpdateFigure(Guid id, UpdateFigureDto figureDto)
+        public async Task<ActionResult> UpdateFigureAsync(Guid id, UpdateFigureDto figureDto)
         {
-            var existingFigure = figureRepository.GetFigure(id);
+            var existingFigure = await figureRepository.GetFigureAsync(id);
             if(existingFigure is null)
             {
                 return NotFound();
@@ -72,21 +73,21 @@ namespace ChessGameApi.Controllers
                 FigureType = figureDto.FigureType
             };
 
-            figureRepository.UpdateFigure(updatedFigure);
+            await figureRepository.UpdateFigureAsync(updatedFigure);
             return NoContent();
         }
 
         // DELETE /Chess/{id}
         [HttpDelete("{id}")]
-        public ActionResult DeleteFigure(Guid id)
+        public async Task<ActionResult> DeleteFigureAsync(Guid id)
         {
-            var existingFigure = figureRepository.GetFigure(id);
+            var existingFigure = await figureRepository.GetFigureAsync(id);
             if (existingFigure is null)
             {
                 return NotFound();
             }
 
-            figureRepository.DeleteFigure(id);
+            await figureRepository.DeleteFigureAsync(id);
             return NoContent();
         }
         

@@ -11,31 +11,35 @@ namespace ChessGameApi.Repositories
             new FigureEntity { Id = Guid.NewGuid(), X = 0, Y = 0, FigureType = "Rook", Player = "White" }
         };
 
-        public IEnumerable<FigureEntity> GetFigures()
+        public async Task<IEnumerable<FigureEntity>> GetFiguresAsync()
         {
-            return figures;
+            return await Task.FromResult(figures);
         }
 
-        public FigureEntity GetFigure(Guid id)
+        public async Task<FigureEntity> GetFigureAsync(Guid id)
         {
-            return figures.Where(f => f.Id == id).SingleOrDefault();
+            var result = figures.Where(f => f.Id == id).SingleOrDefault();
+            return await Task.FromResult(result);
         }
 
-        public void CreateFigure(FigureEntity figure)
+        public async Task CreateFigureAsync(FigureEntity figure)
         {
             figures.Add(figure);
+            await Task.CompletedTask;
         }
 
-        public void UpdateFigure(FigureEntity figure)
+        public async Task UpdateFigureAsync(FigureEntity figure)
         {
             var index = figures.FindIndex(fig => fig.Id == figure.Id);
             figures[index] = figure;
+            await Task.CompletedTask;
         }
 
-        public void DeleteFigure(Guid id)
+        public async Task DeleteFigureAsync(Guid id)
         {
             var index = figures.FindIndex(fig => fig.Id == id);
             figures.RemoveAt(index);
+            await Task.CompletedTask;
         }
     }
 }

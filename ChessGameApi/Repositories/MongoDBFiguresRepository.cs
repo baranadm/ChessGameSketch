@@ -20,32 +20,32 @@ namespace ChessGameApi.Repositories
             _figures = database.GetCollection<FigureEntity>(collectionName);
         }
 
-        public void CreateFigure(FigureEntity figure)
+        public async Task CreateFigureAsync(FigureEntity figure)
         {
-            _figures.InsertOne(figure);
+            await _figures.InsertOneAsync(figure);
         }
 
-        public void DeleteFigure(Guid id)
-        {
-            var filter = _filterBuilder.Eq(fig => fig.Id, id);
-            _figures.DeleteOne(filter);
-        }
-
-        public FigureEntity GetFigure(Guid id)
+        public async Task DeleteFigureAsync(Guid id)
         {
             var filter = _filterBuilder.Eq(fig => fig.Id, id);
-            return _figures.Find(filter).SingleOrDefault();
+            await _figures.DeleteOneAsync(filter);
         }
 
-        public IEnumerable<FigureEntity> GetFigures()
+        public async Task<FigureEntity> GetFigureAsync(Guid id)
         {
-            return _figures.Find(new BsonDocument()).ToList();
+            var filter = _filterBuilder.Eq(fig => fig.Id, id);
+            return await _figures.Find(filter).SingleOrDefaultAsync();
         }
 
-        public void UpdateFigure(FigureEntity figure)
+        public async Task<IEnumerable<FigureEntity>> GetFiguresAsync()
+        {
+            return await _figures.Find(new BsonDocument()).ToListAsync();
+        }
+
+        public async Task UpdateFigureAsync(FigureEntity figure)
         {
             var filter = _filterBuilder.Eq(existFig=> existFig.Id, figure.Id);
-            _figures.ReplaceOne(filter, figure);
+            await _figures.ReplaceOneAsync(filter, figure);
         }
     }
 }
