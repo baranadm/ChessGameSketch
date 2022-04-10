@@ -5,8 +5,8 @@ namespace ChessGameApi.Repositories
 {
     public interface IEnPassantRepository
     {
-        public Task<Field> GetEnPassantFieldAsync();
-        public Task NewEnPassantFieldAsync(Field enPassantField);
+        public Task<FieldEntity> GetEnPassantFieldAsync();
+        public Task NewEnPassantFieldAsync(FieldEntity enPassantField);
         public Task ClearEnPassantFieldAsync();
     }
 }

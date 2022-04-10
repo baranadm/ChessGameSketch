@@ -11,19 +11,19 @@ namespace ChessGameApi.Repositories
     {
         private const string databaseName = "chess";
         private const string collectionName = "enPassantFields";
-        private readonly IMongoCollection<Field> _enPassantFields;
-        private readonly FilterDefinitionBuilder<Field> _filterBuilder = Builders<Field>.Filter;
+        private readonly IMongoCollection<FieldEntity> _enPassantFields;
+        private readonly FilterDefinitionBuilder<FieldEntity> _filterBuilder = Builders<FieldEntity>.Filter;
 
         public MongoDBEnPassantRepository(IOptions<MongoDbSettings> mongoDbSettings)
         {
             MongoClient mongoClient = new MongoClient(mongoDbSettings.Value.ConnectionString);
             IMongoDatabase database = mongoClient.GetDatabase(databaseName);
-            _enPassantFields = database.GetCollection<Field>(collectionName);
+            _enPassantFields = database.GetCollection<FieldEntity>(collectionName);
         }
 
-        public async Task<Field> GetEnPassantFieldAsync()
+        public async Task<FieldEntity> GetEnPassantFieldAsync()
         {
-            List<Field> fields = await _enPassantFields.Find(new BsonDocument()).ToListAsync();
+            List<FieldEntity> fields = await _enPassantFields.Find(new BsonDocument()).ToListAsync();
             if(fields.Count > 1)
             {
                 throw new Exception("More than one en passant fields found.");
@@ -31,7 +31,7 @@ namespace ChessGameApi.Repositories
             return fields[0];
         }
 
-        public async Task NewEnPassantFieldAsync(Field enPassantField)
+        public async Task NewEnPassantFieldAsync(FieldEntity enPassantField)
         {
             await _enPassantFields.DeleteManyAsync(new BsonDocument());
             await _enPassantFields.InsertOneAsync(enPassantField);
