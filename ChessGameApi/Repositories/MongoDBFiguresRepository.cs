@@ -1,6 +1,7 @@
 ﻿using ChessGameApi.Entities;
 using ChessGameApi.Settings;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace ChessGameApi.Repositories
@@ -10,6 +11,7 @@ namespace ChessGameApi.Repositories
         private const string databaseName = "chess";
         private const string collectionName = "figures";
         private readonly IMongoCollection<FigureEntity> _figures;
+        private readonly FilterDefinitionBuilder<FigureEntity> _filterBuilder = Builders<FigureEntity>.Filter;
 
         public MongoDBFiguresRepository(IOptions<MongoDbSettings> mongoDbSettings)
         {
@@ -25,22 +27,25 @@ namespace ChessGameApi.Repositories
 
         public void DeleteFigure(Guid id)
         {
-            throw new NotImplementedException();
+            var filter = _filterBuilder.Eq(fig => fig.Id, id);
+            _figures.DeleteOne(filter);
         }
 
         public FigureEntity GetFigure(Guid id)
         {
-            throw new NotImplementedException();
+            var filter = _filterBuilder.Eq(fig => fig.Id, id);
+            return _figures.Find(filter).SingleOrDefault();
         }
 
         public IEnumerable<FigureEntity> GetFigures()
         {
-            throw new NotImplementedException();
+            return _figures.Find(new BsonDocument()).ToList();
         }
 
         public void UpdateFigure(FigureEntity figure)
         {
-            throw new NotImplementedException();
+            var filter = _filterBuilder.Eq(existFig=> existFig.Id, figure.Id);
+            _figures.ReplaceOne(filter, figure);
         }
     }
 }
