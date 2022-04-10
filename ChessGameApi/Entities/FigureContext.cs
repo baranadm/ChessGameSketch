@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace ChessGameApi.Models
+namespace ChessGameApi.Entities
 {
     public class FigureContext : DbContext
     {
@@ -8,6 +8,6 @@ namespace ChessGameApi.Models
         {
         }
 
-        public DbSet<Figure> Figures { get; set; } = null!;
+        public DbSet<FigureEntity> Figures { get; set; } = null!;
     }
 }
