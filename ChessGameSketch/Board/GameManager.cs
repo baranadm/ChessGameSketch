@@ -76,12 +76,12 @@ namespace ChessGameSketch
             return result;
         }
 
-        public bool IsOutOfBounds(Vector2 nextPosition)
+        private bool IsOutOfBounds(Vector2 nextPosition)
         {
             return nextPosition.X < 0 || nextPosition.X > 7 || nextPosition.Y < 0 || nextPosition.Y > 7;
         }
         
-        public bool WillOverlapFriend(Figure inspectedFigure, Vector2 desiredPosition, Board board)
+        private bool WillOverlapFriend(Figure inspectedFigure, Vector2 desiredPosition, Board board)
         {
             Figure? figureOnDesiredPosition = board.FigureOn(desiredPosition);
             if (figureOnDesiredPosition != null && figureOnDesiredPosition.SamePlayerAs(inspectedFigure))
@@ -91,7 +91,7 @@ namespace ChessGameSketch
             return false;
         }
         
-        public bool WillOverlapOpponent(Figure inspectedFigure, Vector2 desiredPosition, Board board)
+        private bool WillOverlapOpponent(Figure inspectedFigure, Vector2 desiredPosition, Board board)
         {
             Figure? figureOnDesiredPosition = board.FigureOn(desiredPosition);
             if (figureOnDesiredPosition != null && !figureOnDesiredPosition.SamePlayerAs(inspectedFigure))
