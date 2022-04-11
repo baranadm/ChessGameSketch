@@ -2,7 +2,10 @@
 using ChessGameApi.Entities;
 using ChessGameApi.Extensions;
 using ChessGameApi.Repositories;
+using ChessGameSketch;
+using ChessGameSketch.Validator;
 using Microsoft.AspNetCore.Mvc;
+using System.Numerics;
 
 namespace ChessGameApi.Controllers
 {
@@ -11,10 +14,14 @@ namespace ChessGameApi.Controllers
     public class ChessController : ControllerBase
     {
         private readonly IFigureRepository figureRepository;
+        private readonly IEnPassantRepository enPassantRepository;
+        private readonly IChessValidator chessValidator;
 
-        public ChessController(IFigureRepository figureRepository)
+        public ChessController(IFigureRepository figureRepository, IEnPassantRepository enPassantRepository, IChessValidator chessValidator)
         {
             this.figureRepository = figureRepository;
+            this.enPassantRepository = enPassantRepository;
+            this.chessValidator = chessValidator;
         }
 
         //GET /chess
@@ -51,19 +58,28 @@ namespace ChessGameApi.Controllers
                 FigureType = newFigureDto.FigureType
             };
 
+            FieldEntity enPassantField = new()
+            {
+                Id = Guid.NewGuid(),
+                X = newFigureDto.X,
+                Y = newFigureDto.Y
+            };
+            await enPassantRepository.NewEnPassantFieldAsync(enPassantField);
+
             await figureRepository.CreateFigureAsync(figureEntity);
             return CreatedAtAction(nameof(GetFigureAsync), new { id = figureEntity.Id }, figureEntity.AsDto());
         }
 
         // PUT /chess/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateFigureAsync(Guid id, UpdateFigureDto figureDto)
+        public async Task<ActionResult> MoveFigureAsync(Guid id, UpdateFigureDto figureDto)
         {
             var existingFigure = await figureRepository.GetFigureAsync(id);
             if(existingFigure is null)
             {
                 return NotFound();
             }
+
 
             FigureEntity updatedFigure = existingFigure with
             {
@@ -91,5 +107,25 @@ namespace ChessGameApi.Controllers
             return NoContent();
         }
         
+        [HttpGet("getAllowedMoves/{id}")]
+        public async Task<ActionResult<List<FieldDto>>> GetAllowedPositions(Guid id)
+        {
+
+            List<Figure> figuresOnBoard = (await figureRepository.GetFiguresAsync()).Select(fig => fig.AsFigure()).ToList();
+            Board board = new Board(figuresOnBoard);
+
+            FieldEntity? enPassant = await enPassantRepository.GetEnPassantFieldAsync();
+            if (enPassant != null) board.EnPassantField = enPassant.AsVector2();
+
+            Figure figureInspected = (await figureRepository.GetFigureAsync(id)).AsFigure();
+            if (figureInspected is null)
+            {
+                return NotFound();
+            }
+            List<Vector2> allowedMoves = chessValidator.GetAllowedMoves(board, figureInspected);
+
+            return allowedMoves.Select(vec => vec.AsFieldDto()).ToList();
+        }
+
     }
 }

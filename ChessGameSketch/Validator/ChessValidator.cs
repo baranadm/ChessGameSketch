@@ -1,8 +1,8 @@
 ﻿using System.Numerics;
 
-namespace ChessGameSketch
+namespace ChessGameSketch.Validator
 {
-    public class GameManager
+    public class ChessValidator : IChessValidator
     {
 
         public List<Vector2> GetAllowedMoves(Board board, Figure figureInspected)

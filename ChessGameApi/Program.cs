@@ -1,6 +1,8 @@
 using ChessGameApi.Entities;
 using ChessGameApi.Repositories;
 using ChessGameApi.Settings;
+using ChessGameSketch;
+using ChessGameSketch.Validator;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 
@@ -12,6 +14,7 @@ builder.Services.AddControllers(options => options.SuppressAsyncSuffixInActionNa
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
 builder.Services.AddSingleton<IFigureRepository, MongoDBFiguresRepository>();
 builder.Services.AddSingleton<IEnPassantRepository, MongoDBEnPassantRepository>();
+builder.Services.AddSingleton<IChessValidator, ChessValidator>();
 builder.Services.AddDbContext<FigureContext>(opt => opt.UseInMemoryDatabase("Figures"));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 //builder.Services.AddEndpointsApiExplorer();

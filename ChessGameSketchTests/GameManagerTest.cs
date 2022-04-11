@@ -9,7 +9,7 @@ namespace ChessGameSketchTests
     [TestClass]
     public class GameManagerTest
     {
-        GameManager underTest = new GameManager();
+        ChessValidator underTest = new ChessValidator();
 
         [TestMethod]
         public void GetAllowedMoves_ForPawn_CorrectFirstAllowedMoves()
