@@ -58,13 +58,6 @@ namespace ChessGameApi.Controllers
                 FigureType = newFigureDto.FigureType
             };
 
-            FieldEntity enPassantField = new()
-            {
-                Id = Guid.NewGuid(),
-                X = newFigureDto.X,
-                Y = newFigureDto.Y
-            };
-            await enPassantRepository.NewEnPassantFieldAsync(enPassantField);
 
             await figureRepository.CreateFigureAsync(figureEntity);
             return CreatedAtAction(nameof(GetFigureAsync), new { id = figureEntity.Id }, figureEntity.AsDto());
@@ -72,24 +65,38 @@ namespace ChessGameApi.Controllers
 
         // PUT /chess/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult> MoveFigureAsync(Guid id, UpdateFigureDto figureDto)
+        public async Task<ActionResult> MoveFigureAsync(Guid id, MoveFigureDto desiredFigureDto)
         {
             var existingFigure = await figureRepository.GetFigureAsync(id);
             if(existingFigure is null)
             {
-                return NotFound();
+                return NotFound($"Figure with id: {id} has not been found.");
+            }
+            
+            //handle en passant
+            await enPassantRepository.ClearEnPassantFieldAsync();
+            if (existingFigure.FigureType == "Pawn")
+            {
+                if (Math.Abs(existingFigure.Y - desiredFigureDto.Y) == 2)
+                {
+                    FieldEntity enPassantField = new()
+                    {
+                        Id = Guid.NewGuid(),
+                        X = existingFigure.X,
+                        Y = (existingFigure.Y + desiredFigureDto.Y) / 2
+                    };
+                    await enPassantRepository.NewEnPassantFieldAsync(enPassantField);
+                }
             }
 
-
-            FigureEntity updatedFigure = existingFigure with
+            //make move
+            FigureEntity afterMove = existingFigure with
             {
-                X = figureDto.X,
-                Y = figureDto.Y,
-                Player = figureDto.Player,
-                FigureType = figureDto.FigureType
+                X = desiredFigureDto.X,
+                Y = desiredFigureDto.Y,
             };
 
-            await figureRepository.UpdateFigureAsync(updatedFigure);
+            await figureRepository.UpdateFigureAsync(afterMove);
             return NoContent();
         }
 
@@ -114,6 +121,7 @@ namespace ChessGameApi.Controllers
             List<Figure> figuresOnBoard = (await figureRepository.GetFiguresAsync()).Select(fig => fig.AsFigure()).ToList();
             Board board = new Board(figuresOnBoard);
 
+            // check for enPassantField
             FieldEntity? enPassant = await enPassantRepository.GetEnPassantFieldAsync();
             if (enPassant != null) board.EnPassantField = enPassant.AsVector2();
 

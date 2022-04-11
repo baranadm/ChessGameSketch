@@ -33,7 +33,6 @@ namespace ChessGameApi.Repositories
 
         public async Task NewEnPassantFieldAsync(FieldEntity enPassantField)
         {
-            await _enPassantFields.DeleteManyAsync(new BsonDocument());
             await _enPassantFields.InsertOneAsync(enPassantField);
         }
 
