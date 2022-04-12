@@ -362,17 +362,17 @@ namespace ChessGameSketchTests
 
             Pawn whitePawn = new Pawn(new Vector2(3, 3), Player.White);
             board.PutFigure(whitePawn);
-            board.EnPassantField = new Vector2(3, 1);
+            board.EnPassantField = new Vector2(3, 2);
 
-            Pawn blackPawn = new Pawn(new Vector2(2, 2), Player.Black);
+            Pawn blackPawn = new Pawn(new Vector2(2, 3), Player.Black);
             board.PutFigure(blackPawn);
             // Act
             List<Vector2> result = underTest.GetAllowedMoves(board, blackPawn);
 
             // Assert
             List<Vector2> expected = new List<Vector2>() {
-                new Vector2(2, 1),
-                new Vector2(3, 1),
+                new Vector2(2, 2),
+                new Vector2(3, 2),
             };
             result.Should().BeEquivalentTo(expected);
         }
@@ -398,6 +398,49 @@ namespace ChessGameSketchTests
             // Assert
             List<Vector2> expected = new List<Vector2>() {
                 new Vector2(2, 3),
+            };
+            result.Should().BeEquivalentTo(expected);
+        }
+
+        [TestMethod]
+        public void GetAllowedMoves_ForWhitePawn_WhenNeighbourWhitePawnCreatedEnPassant_ReturnsCorrectMovesWithoutEnPassantField()
+        {
+            // Arrange
+            Board board = new Board();
+
+            Pawn whitePawn = new Pawn(new Vector2(0, 1), Player.White);
+            board.PutFigure(whitePawn);
+
+            board.EnPassantField = new Vector2(1, 2);
+            // Act
+            List<Vector2> result = underTest.GetAllowedMoves(board, whitePawn);
+
+            // Assert
+            List<Vector2> expected = new List<Vector2>() {
+                new Vector2(0, 2),
+                new Vector2(0, 3)
+            };
+            result.Should().BeEquivalentTo(expected);
+        }
+
+        [TestMethod]
+        public void GetAllowedMoves_ForWhitePawn_WhenTwoStepMoveIsBlockedByOpponentsPawn_ReturnsOnlySingleStepMove()
+        {
+            // Arrange
+            Board board = new Board();
+
+            Pawn whitePawn = new Pawn(new Vector2(0, 1), Player.White);
+            board.PutFigure(whitePawn);
+
+            Pawn blackPawn = new Pawn(new Vector2(0, 3), Player.Black);
+            board.PutFigure(blackPawn);
+
+            // Act
+            List<Vector2> result = underTest.GetAllowedMoves(board, whitePawn);
+
+            // Assert
+            List<Vector2> expected = new List<Vector2>() {
+                new Vector2(0, 2)
             };
             result.Should().BeEquivalentTo(expected);
         }

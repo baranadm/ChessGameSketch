@@ -10,7 +10,6 @@ namespace ChessGameSketch.Validator
             List<Vector2> possibleMoves = GetAccessiblePositions(figureInspected, board);
 
             List<Vector2> movesCausingCheck = new List<Vector2>();
-
             List<Figure> friendlyKings = board.FindPlayersFiguresWithType(FigureType.King, figureInspected.Player);
             if (friendlyKings.Any())
             {
@@ -60,7 +59,7 @@ namespace ChessGameSketch.Validator
 
                 if (IsOutOfBounds(nextPosition)) break;
                 if (WillOverlapFriend(inspectedFigure, nextPosition, board)) break;
-                else if (WillOverlapOpponent(inspectedFigure, nextPosition, board))
+                else if (!inspectedFigure.IsType(FigureType.Pawn) && WillOverlapOpponent(inspectedFigure, nextPosition, board))
                 {
                     result.Add(nextPosition);
                     break;
@@ -104,12 +103,12 @@ namespace ChessGameSketch.Validator
         private List<MoveDirection> ContextDependentMovesFor(Figure inspectedFigure, Board board)
         {
             List<MoveDirection> inspectedFigureMoves = inspectedFigure.GetFigureMoves();
+            inspectedFigureMoves.RemoveAll(move => WillOverlapOpponent(inspectedFigure, Vector2.Add(inspectedFigure.Position, move.Step), board));
             if (inspectedFigure.IsType(FigureType.Pawn))
             {
                 Pawn pawn = (Pawn)inspectedFigure;
                 inspectedFigureMoves.AddRange(GetPawnsPossibleAttackMoves(pawn, board));
             }
-
             return inspectedFigureMoves;
         }
 
@@ -125,7 +124,8 @@ namespace ChessGameSketch.Validator
                     pawnsAttackMoves.Add(attackMove);
 
                 if (positionUnderAttack == board.EnPassantField)
-                    pawnsAttackMoves.Add(attackMove);
+                    if(board.EnPassantField.Value.Y == 2 && pawn.Player == Player.Black || board.EnPassantField.Value.Y == 5 && pawn.Player == Player.White)
+                        pawnsAttackMoves.Add(attackMove);
             }
             return pawnsAttackMoves;
         }
