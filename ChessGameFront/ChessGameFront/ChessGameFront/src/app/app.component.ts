@@ -7,20 +7,21 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  public forecasts?: WeatherForecast[];
+  public figures?: Figure[];
 
   constructor(http: HttpClient) {
-    http.get<WeatherForecast[]>('/weatherforecast').subscribe(result => {
-      this.forecasts = result;
+    http.get<Figure[]>('https://localhost:7024/Chess').subscribe(result => {
+      this.figures = result;
     }, error => console.error(error));
   }
 
   title = 'ChessGameFront';
 }
 
-interface WeatherForecast {
-  date: string;
-  temperatureC: number;
-  temperatureF: number;
-  summary: string;
+interface Figure {
+  id: string;
+  x: number;
+  y: number;
+  player: string;
+  figureType: string;
 }

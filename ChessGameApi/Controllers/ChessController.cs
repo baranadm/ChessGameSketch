@@ -4,6 +4,7 @@ using ChessGameApi.Extensions;
 using ChessGameApi.Repositories;
 using ChessGameSketch;
 using ChessGameSketch.Validator;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System.Numerics;
 
@@ -11,6 +12,7 @@ namespace ChessGameApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [EnableCors("LocalAngular")]
     public class ChessController : ControllerBase
     {
         private readonly IFigureRepository figureRepository;
