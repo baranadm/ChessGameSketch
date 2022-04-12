@@ -15,7 +15,9 @@
 <table *ngIf="tiles">
   <tbody>
     <tr *ngFor="let column of tiles">
-      <td *ngFor="let tile of column" class="tile" [ngClass]="tile.class">{{ tile.occupiedBy?.figureType }}<br />{{tile.occupiedBy?.player}}</td>
+      <td *ngFor="let tile of column" class="tile" [ngClass]="tile.class">
+        <img [src]="tile.occupiedBy?.imagePath" (click)="onPieceClicked(tile.occupiedBy)"/>
+      </td>
     </tr>
   </tbody>
 </table>

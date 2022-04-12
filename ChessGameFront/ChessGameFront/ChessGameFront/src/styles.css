@@ -11,3 +11,8 @@
 .black-tile {
     background-color: #9c6a02;
 }
+
+.to-move-tile {
+    z-index: 9;
+    background-color: #1f3fff7a;
+}

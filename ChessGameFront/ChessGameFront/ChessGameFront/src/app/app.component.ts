@@ -10,15 +10,43 @@ import { generate } from 'rxjs';
 
 export class AppComponent implements OnInit {
   private readonly API_URL = 'https://localhost:7024/Chess';
+  private readonly httpClient;
   public figuresOnBoard: FigureOnBoard[] = [];
   public tiles: Tile[][] = [];
 
   constructor(http: HttpClient) {
-    http.get<FigureOnBoard[]>(this.API_URL).subscribe(result => this.loadFigures(result), error => console.error(error));
+    this.httpClient = http;
+
+    this.httpClient.get<FigureOnBoard[]>(this.API_URL).subscribe(result => this.loadFigures(result), error => console.error(error));
   }
 
   ngOnInit(): void {
     this.tiles = this.generateBoard();
+  }
+
+  onPieceClicked(clicked: any) {
+    this.unmarkAllowedToMove();
+    let figure = clicked as FigureOnBoard;
+
+    this.tiles.forEach(row => row.forEach(tile => {
+      if (tile.x == figure.x && tile.y == figure.y) tile.class += ' to-move-tile';
+    }));
+    this.httpClient.get<AllowedToMove[]>(this.API_URL + '/getAllowedMoves/' + figure.id).subscribe(result => this.markAsAllowedToMove(result));
+  }
+
+  markAsAllowedToMove(result: AllowedToMove[]): void {
+    this.tiles.forEach(row => row.forEach(tile => {
+      let isAllowedToMove = result.find(move => move.x == tile.x && move.y == tile.y);
+      if (isAllowedToMove) {
+        tile.class += ' to-move-tile';
+      }
+    }))
+  }
+
+  unmarkAllowedToMove() {
+    this.tiles.forEach(row => row.forEach(tile => {
+      tile.class = tile.class.replace('to-move-tile', '');
+    }))
   }
 
   generateBoard(): Tile[][] {
@@ -40,7 +68,16 @@ export class AppComponent implements OnInit {
 
   loadFigures(result: FigureOnBoard[]) {
     console.info(result);
-    this.figuresOnBoard = result;
+    result.forEach(fig => {
+      this.figuresOnBoard.push({
+        id: fig.id,
+        x: fig.x,
+        y: fig.y,
+        player: fig.player,
+        figureType: fig.figureType,
+        imagePath: imagePathFor(fig)
+      });
+    })
     this.updateBoard();
   }
 
@@ -55,6 +92,14 @@ export class AppComponent implements OnInit {
   title = 'ChessGameFront';
 }
 
+function imagePathFor(fig: FigureOnBoard): string {
+  return 'assets/pieces/' + fig.figureType.toLowerCase() + fig.player.charAt(0).toUpperCase() + '.png';
+}
+
+interface AllowedToMove {
+  x: number;
+  y: number;
+}
 interface FigureOnBoard extends Figure {
   id: string;
   x: number;
@@ -63,6 +108,7 @@ interface FigureOnBoard extends Figure {
 interface Figure {
   player: string;
   figureType: string;
+  imagePath: string;
 }
 
 interface Tile {
@@ -72,5 +118,4 @@ interface Tile {
   occupiedBy?: Figure;
   readablePosition: string;
 }
-
 
