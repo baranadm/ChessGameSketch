@@ -1,11 +1,21 @@
-<h1 id="tableLabel">Figures hommie</h1>
+<h1 id="tableLabel">Chess Game</h1>
 
-<p *ngIf="!figures"><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationangular">https://aka.ms/jspsintegrationangular</a> for more details.</em></p>
+<p *ngIf="!figuresOnBoard"><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationangular">https://aka.ms/jspsintegrationangular</a> for more details.</em></p>
 
-<table *ngIf="figures">
-    <tbody>
-        <tr *ngFor="let figure of figures">
-            <td>{{ figure.figureType }}: {{ figure.player }}, position: {{ figure.x }}, {{ figure.y }}</td>
-        </tr>
-    </tbody>
+
+
+
+<table *ngIf="figuresOnBoard">
+  <tbody>
+    <tr *ngFor="let figure of figuresOnBoard">
+      <td>{{ figure.figureType }}: {{ figure.player }}, position: {{ figure.x }}, {{ figure.y }}</td>
+    </tr>
+  </tbody>
+</table>
+<table *ngIf="tiles">
+  <tbody>
+    <tr *ngFor="let column of tiles">
+      <td *ngFor="let tile of column" class="tile" [ngClass]="tile.class">{{ tile.occupiedBy?.figureType }}<br />{{tile.occupiedBy?.player}}</td>
+    </tr>
+  </tbody>
 </table>
