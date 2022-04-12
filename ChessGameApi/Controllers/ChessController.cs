@@ -28,11 +28,11 @@ namespace ChessGameApi.Controllers
 
         //GET /chess
         [HttpGet]
-        public async Task <IEnumerable<FigureDto>> GetFiguresAsync()
+        public async Task<ActionResult<IEnumerable<FigureDto>>> GetFiguresAsync()
         {
             var figures = (await figureRepository.GetFiguresAsync())
                 .Select(fig => fig.AsDto());
-            return figures;
+            return Ok(figures);
         }
 
         //GET /chess/{id}
@@ -67,7 +67,7 @@ namespace ChessGameApi.Controllers
 
         // PUT /chess/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult> MoveFigureAsync(Guid id, MoveFigureDto desiredFigureDto)
+        public async Task<ActionResult<IEnumerable<FigureDto>>> MoveFigureAsync(Guid id, MoveFigureDto desiredFigureDto)
         {
             var existingFigure = await figureRepository.GetFigureAsync(id);
             if(existingFigure is null)
@@ -99,7 +99,8 @@ namespace ChessGameApi.Controllers
             };
 
             await figureRepository.UpdateFigureAsync(afterMove);
-            return NoContent();
+
+            return GetFiguresAsync().Result;
         }
 
         // DELETE /Chess/{id}
