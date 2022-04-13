@@ -75,8 +75,9 @@ namespace ChessGameApi.Controllers
                 return NotFound($"Figure with id: {id} has not been found.");
             }
 
+            FieldDto desiredPosition = new FieldDto() { X = desiredFigureDto.X, Y = desiredFigureDto.Y };
             // validate move
-            if (GetAllowedPositions(id).Result.Value.Contains(new FieldDto() { X = desiredFigureDto.X, Y = desiredFigureDto.Y }))
+            if (GetAllowedPositions(id).Result.Value.Contains(desiredPosition))
             {
                 //handle en passant
                 await enPassantRepository.ClearEnPassantFieldAsync();
@@ -93,6 +94,9 @@ namespace ChessGameApi.Controllers
                         await enPassantRepository.NewEnPassantFieldAsync(enPassantField);
                     }
                 }
+
+                //remove figure on desired position, if any
+                await figureRepository.DeleteFigureAtPositionAsync(desiredPosition.X, desiredPosition.Y);
 
                 //make move
                 FigureEntity afterMove = existingFigure with

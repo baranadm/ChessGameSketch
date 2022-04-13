@@ -18,6 +18,7 @@ builder.Services.AddCors(options =>
                           .AllowAnyMethod();
                       });
 });
+
 // Add services to the container.
 
 builder.Services.AddControllers(options => options.SuppressAsyncSuffixInActionNames = false);

@@ -42,6 +42,12 @@ namespace ChessGameApi.Repositories
             return await _figures.Find(new BsonDocument()).ToListAsync();
         }
 
+        public async Task DeleteFigureAtPositionAsync(int x, int y)
+        {
+            var filter = _filterBuilder.Where(fig => fig.X == x && fig.Y == y);
+            await _figures.DeleteOneAsync(filter);
+        }
+
         public async Task UpdateFigureAsync(FigureEntity figure)
         {
             var filter = _filterBuilder.Eq(existFig=> existFig.Id, figure.Id);
