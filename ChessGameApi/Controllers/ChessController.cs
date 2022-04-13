@@ -70,37 +70,51 @@ namespace ChessGameApi.Controllers
         public async Task<ActionResult<IEnumerable<FigureDto>>> MoveFigureAsync(Guid id, MoveFigureDto desiredFigureDto)
         {
             var existingFigure = await figureRepository.GetFigureAsync(id);
-            if(existingFigure is null)
+            if (existingFigure is null)
             {
                 return NotFound($"Figure with id: {id} has not been found.");
             }
-            
-            //handle en passant
-            await enPassantRepository.ClearEnPassantFieldAsync();
-            if (existingFigure.FigureType == "Pawn")
+
+            // validate move
+            if (GetAllowedPositions(id).Result.Value.Contains(new FieldDto() { X = desiredFigureDto.X, Y = desiredFigureDto.Y }))
             {
-                if (Math.Abs(existingFigure.Y - desiredFigureDto.Y) == 2)
+                //handle en passant
+                await enPassantRepository.ClearEnPassantFieldAsync();
+                if (existingFigure.FigureType == "Pawn")
                 {
-                    FieldEntity enPassantField = new()
+                    if (Math.Abs(existingFigure.Y - desiredFigureDto.Y) == 2)
                     {
-                        Id = Guid.NewGuid(),
-                        X = existingFigure.X,
-                        Y = (existingFigure.Y + desiredFigureDto.Y) / 2
-                    };
-                    await enPassantRepository.NewEnPassantFieldAsync(enPassantField);
+                        FieldEntity enPassantField = new()
+                        {
+                            Id = Guid.NewGuid(),
+                            X = existingFigure.X,
+                            Y = (existingFigure.Y + desiredFigureDto.Y) / 2
+                        };
+                        await enPassantRepository.NewEnPassantFieldAsync(enPassantField);
+                    }
                 }
+
+                //make move
+                FigureEntity afterMove = existingFigure with
+                {
+                    X = desiredFigureDto.X,
+                    Y = desiredFigureDto.Y,
+                };
+
+                await figureRepository.UpdateFigureAsync(afterMove);
+
+                return GetFiguresAsync().Result;
             }
-
-            //make move
-            FigureEntity afterMove = existingFigure with
+            else
             {
-                X = desiredFigureDto.X,
-                Y = desiredFigureDto.Y,
-            };
-
-            await figureRepository.UpdateFigureAsync(afterMove);
-
-            return GetFiguresAsync().Result;
+                return Problem(
+                            type: "/docs/errors/forbidden",
+                            title: "Move is forbidden.",
+                            detail: $"Figure can not move to desired field.",
+                            statusCode: StatusCodes.Status403Forbidden,
+                            instance: HttpContext.Request.Path
+                       );
+            }
         }
 
         // DELETE /Chess/{id}
@@ -116,7 +130,7 @@ namespace ChessGameApi.Controllers
             await figureRepository.DeleteFigureAsync(id);
             return NoContent();
         }
-        
+
         [HttpGet("getAllowedMoves/{id}")]
         public async Task<ActionResult<List<FieldDto>>> GetAllowedPositions(Guid id)
         {

@@ -58,6 +58,7 @@ export class AppComponent implements OnInit {
   }
 
   onFiguresResult(result: FigureOnBoard[]) {
+    this.unmarkAllTiles();
     this.processFiguresResponse(result);
     this.flushTiles();
   }
