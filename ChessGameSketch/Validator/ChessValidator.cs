@@ -103,9 +103,10 @@ namespace ChessGameSketch.Validator
         private List<MoveDirection> ContextDependentMovesFor(Figure inspectedFigure, Board board)
         {
             List<MoveDirection> inspectedFigureMoves = inspectedFigure.GetFigureMoves();
-            inspectedFigureMoves.RemoveAll(move => WillOverlapOpponent(inspectedFigure, Vector2.Add(inspectedFigure.Position, move.Step), board));
             if (inspectedFigure.IsType(FigureType.Pawn))
             {
+                inspectedFigureMoves.RemoveAll(move => WillOverlapOpponent(inspectedFigure, Vector2.Add(inspectedFigure.Position, move.Step), board));
+                
                 Pawn pawn = (Pawn)inspectedFigure;
                 inspectedFigureMoves.AddRange(GetPawnsPossibleAttackMoves(pawn, board));
             }

@@ -444,5 +444,29 @@ namespace ChessGameSketchTests
             };
             result.Should().BeEquivalentTo(expected);
         }
+
+        [TestMethod]
+        public void GetAllowedMoves_ForWhiteKing_WhenQueenIsNearby_ReturnsCorrectMoves()
+        {
+            // Arrange
+            Board board = new Board();
+
+            King whiteKing = new King(new Vector2(4, 5), Player.White);
+            board.PutFigure(whiteKing);
+
+            Queen blackQueen = new Queen(new Vector2(3, 6), Player.Black);
+            board.PutFigure(blackQueen);
+
+            // Act
+            List<Vector2> result = underTest.GetAllowedMoves(board, whiteKing);
+
+            // Assert
+            List<Vector2> expected = new List<Vector2>() {
+                new Vector2(4, 4),
+                new Vector2(5, 5),
+                new Vector2(3, 6)
+            };
+            result.Should().BeEquivalentTo(expected);
+        }
     }
 }
