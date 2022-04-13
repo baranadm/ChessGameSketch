@@ -71,7 +71,7 @@ namespace ChessGameApi.Controllers
 
         // POST /chess
         [HttpPost]
-        public async Task<ActionResult<FigureDto>> CreateFigureAsync(CreateFigureDto newFigureDto)
+        public async Task<ActionResult<IEnumerable<FigureDto>>> CreateFigureAsync(CreateFigureDto newFigureDto)
         {
             FigureEntity figureEntity = new()
             {
@@ -84,7 +84,7 @@ namespace ChessGameApi.Controllers
 
 
             await figureRepository.CreateFigureAsync(figureEntity);
-            return CreatedAtAction(nameof(GetFigureAsync), new { id = figureEntity.Id }, figureEntity.AsDto());
+            return await GetFiguresAsync();
         }
 
         // PUT /chess/{id}
