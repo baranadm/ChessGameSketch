@@ -11,9 +11,9 @@ import { generate, Observable } from 'rxjs';
 export class AppComponent implements OnInit {
   private readonly API_URL = 'https://localhost:7024/Chess';
   private readonly httpClient;
-  public figuresOnBoard: FigureOnBoard[] = [];
+  public figuresOnBoard: Figure[] = [];
   public tiles: Tile[][] = [];
-  private activeFigure?: FigureOnBoard;
+  public activeFigure?: Figure;
 
   constructor(http: HttpClient) {
     this.httpClient = http;
@@ -21,51 +21,62 @@ export class AppComponent implements OnInit {
   }
 
     private getFiguresFromApi() {
-        return this.httpClient.get<FigureOnBoard[]>(this.API_URL);
+      return this.httpClient.get<Figure[]>(this.API_URL);
     }
 
   ngOnInit(): void {
     this.getFiguresFromApi().subscribe(result => this.onFiguresResult(result), error => console.error(error));
   }
 
-  onFigureClicked(clicked: any) {
-    this.unmarkAllTiles();
-  }
-
   onTileClicked(tileClicked: Tile) {
-
-    // without active figure
-    if (this.activeFigure == undefined) {
-      // tile clicked has figure
-      if (tileClicked.occupiedBy != undefined) {
-        this.actionForNewActiveFgure(tileClicked);
-      } else {
-        this.unmarkAllTiles();
+    if (this.activeFigure == undefined) { // without active figure
+      if (tileClicked.occupiedBy != undefined) { // tile clicked has figure
+        this.selectFigureAndShowMoves(tileClicked.occupiedBy as Figure);
       }
-    } else {
-      if (tileClicked.occupiedBy?.player == this.activeFigure.player) {
-        this.actionForNewActiveFgure(tileClicked);
-      } else {
-        let desiredPosition: Position = {
-          x: tileClicked.x,
-          y: tileClicked.y
+      //else { // tile clicked is free
+      //  this.unmarkAllTiles();
+      //}
+    } else if (this.activeFigure != undefined) { // with active figure
+      if ("id" in this.activeFigure) { // active figure is on a board
+        let activeFromBoard = this.activeFigure as Figure;
+        if (tileClicked.occupiedBy?.player == activeFromBoard.player) { // if tileClicked has friendly figure
+          this.selectFigureAndShowMoves(activeFromBoard);
+        } else { // if tileClicked is free or has opponent
+          let desiredPosition: Position = {
+            x: tileClicked.x,
+            y: tileClicked.y
+          }
+          this.sendMoveFigureRequest(activeFromBoard, desiredPosition).subscribe(
+            result => this.onMoveSuccess(result),
+            error => this.onMoveFailure(error));
         }
-
-        this.sendMoveFigureRequest(this.activeFigure, desiredPosition).subscribe(result => this.onFiguresResult(result),
-          error => console.error(error));
       }
     }
   }
-
-  onFiguresResult(result: FigureOnBoard[]) {
-    this.unmarkAllTiles();
-    this.processFiguresResponse(result);
-    this.flushTiles();
+  selectFigureAndShowMoves(figure: Figure) {
+    this.activeFigure = figure;
+    this.showMovesForFigure(figure);
   }
 
-  processFiguresResponse(result: FigureOnBoard[]) {
+  onMoveSuccess(result: Figure[]) {
+    this.cancelSelection();
+    this.onFiguresResult(result);
+  }
+
+  onMoveFailure(error: any) {
+    this.cancelSelection();
+    console.error(error);
+  }
+
+  onFiguresResult(result: Figure[]) {
+    this.reloadFigures(result);
+    this.refreshAndPopulateTiles();
+  }
+
+  reloadFigures(result: Figure[]) {
     // cleans board
     this.figuresOnBoard = [];
+
     // populates figures array with mapped result's figures
     result.forEach(fig => {
       this.figuresOnBoard.push({
@@ -79,7 +90,7 @@ export class AppComponent implements OnInit {
     })
   }
 
-  flushTiles() {
+  refreshAndPopulateTiles() {
     this.tiles.forEach(
       row => row.forEach(
         tile => tile.occupiedBy = this.figuresOnBoard.find(
@@ -89,7 +100,7 @@ export class AppComponent implements OnInit {
     this.figuresOnBoard.forEach(fig => this.tiles[fig.x][fig.y].occupiedBy = fig);
   }
 
-  private sendMoveFigureRequest(figure: FigureOnBoard, desiredPosition: Position) {
+  private sendMoveFigureRequest(figure: Figure, desiredPosition: Position) {
     let requestUrl = this.API_URL + '/' + figure.id;
 
     const httpOptions = {
@@ -98,28 +109,25 @@ export class AppComponent implements OnInit {
       })
     };
 
-    let request: Observable<FigureOnBoard[]> = this.httpClient.put<FigureOnBoard[]>(requestUrl, desiredPosition, httpOptions);
+    let request: Observable<Figure[]> = this.httpClient.put<Figure[]>(requestUrl, desiredPosition, httpOptions);
     return request;
   }
 
-  private actionForNewActiveFgure(tileClicked: Tile) {
-    this.unmarkAllTiles();
-    console.info(`Old active figure: ${this.activeFigure}`);
-    this.activeFigure = tileClicked.occupiedBy as FigureOnBoard;
-    console.info(`New active figure:`);
-    console.info(this.activeFigure);
+  private showMovesForFigure(figure: Figure) {
+    //this.unmarkAllTiles();
+    
     // mark current figure's tile
-    tileClicked.class += " tile-to-move";
+    //this.tiles[figure.x][figure.y].class += " tile-to-move";
 
     // mark possible move's tiles
-    this.httpClient.get<Position[]>(this.API_URL + '/getAllowedMoves/' + this.activeFigure.id).subscribe(result => this.markAsAllowedToMove(result));
+    this.httpClient.get<Position[]>(this.API_URL + '/getAllowedMoves/' + figure.id).subscribe(result => this.markAsAllowedToMove(result));
     }
 
   markAsAllowedToMove(result: Position[]): void {
     this.tiles.forEach(row => row.forEach(tile => {
       let isAllowedToMove = result.find(move => move.x == tile.x && move.y == tile.y);
       if (isAllowedToMove) {
-        tile.class += ' tile-to-move';
+        tile.markedToMove = true;
       }
     }))
   }
@@ -131,7 +139,7 @@ export class AppComponent implements OnInit {
 
   unmarkAllTiles() {
     this.tiles.forEach(row => row.forEach(tile => {
-      tile.class = tile.class.replace('tile-to-move', '');
+      tile.markedToMove = false;
     }))
   }
 
@@ -144,7 +152,7 @@ export class AppComponent implements OnInit {
       for (let y = 0; y <= 7; y++) {
         let readableColumnName = String.fromCharCode(asciiNumberOfLetterA + y);
         let currentTileClass = (x + y) % 2 == 0 ? 'tile-black' : 'tile-white';
-        let tile: Tile = { x: x, y: y, class: currentTileClass, occupiedBy: undefined, readablePosition: readableColumnName + readableRowNumber };
+        let tile: Tile = { x: x, y: y, class: currentTileClass, occupiedBy: undefined, readablePosition: readableColumnName + readableRowNumber, markedToMove: false };
         column[y] = tile;
       }
       tiles[x] = column;
@@ -157,7 +165,7 @@ export class AppComponent implements OnInit {
   title = 'ChessGameFront';
 }
 
-function imagePathFor(fig: FigureOnBoard): string {
+function imagePathFor(fig: Figure): string {
   return 'assets/pieces/' + fig.figureType.toLowerCase() + fig.player.charAt(0).toUpperCase() + '.png';
 }
 
@@ -165,12 +173,11 @@ interface Position {
   x: number;
   y: number;
 }
-interface FigureOnBoard extends Figure {
+
+interface Figure {
   id: string;
   x: number;
   y: number;
-}
-interface Figure {
   player: string;
   figureType: string;
   imagePath: string;
@@ -182,5 +189,6 @@ interface Tile {
   class: string;
   occupiedBy?: Figure;
   readablePosition: string;
+  markedToMove: boolean;
 }
 

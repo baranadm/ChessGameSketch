@@ -1,12 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
 
 .board {
-    border: 2px solid blue;
+  border: 2px solid blue;
 }
+
 .board-column {
   display: flex;
   flex-direction: column-reverse;
 }
+
 .board-row {
   display: flex;
   flex-direction: row;
@@ -19,7 +21,6 @@
 .container {
   display: flex;
   flex-direction: row;
-
   border: 3px solid green;
 }
 
@@ -27,45 +28,47 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-
   font-size: x-large;
   font-weight: 600;
   border: 2px solid blue;
 }
 
 .right-pane-section {
-    display: flex;
+  display: flex;
+  flex-direction: column;
   flex-grow: 1;
   border: 1px solid black;
-
   align-items: center;
   justify-content: center;
 }
 
 .tile {
+  display: flex;
   width: 80px;
   height: 80px;
   border: 1px solid black;
 }
+
 .tile-black {
-    background-color: #9c6a02;
+  background-color: #9c6a02;
 }
 
 .tile-figure {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
 }
 
 .tile-position {
 }
 
-.tile-to-move {
-  z-index: 9;
+.tile-white {
+  background-color: #ffd87a;
+}
+
+.overlay {
+  display: flex;
+  position: absolute;
+  width: inherit;
+  height: inherit;
   background-color: #1f3fff7a !important;
 }
-
-.tile-white {
-    background-color: #ffd87a;
-}
-
-
