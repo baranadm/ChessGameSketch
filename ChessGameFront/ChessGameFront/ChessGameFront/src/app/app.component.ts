@@ -14,7 +14,7 @@ export class AppComponent implements OnInit {
   public figuresOnBoard: Figure[] = [];
   public figuresOffBoard: NewFigure[] = [];
   public tiles: Tile[][] = [];
-  public activeFigure?: Figure;
+  public activeFigure?: Figure | NewFigure;
 
   constructor(http: HttpClient) {
     this.httpClient = http;
@@ -34,6 +34,9 @@ export class AppComponent implements OnInit {
     this.getFiguresOffBoardFromApi().subscribe(result => this.onFiguresOfBoardResult(result), error => console.error());
   }
 
+  onNewFigureClicked(figureClicked: NewFigure) {
+    this.activeFigure = figureClicked;
+  }
   onTileClicked(tileClicked: Tile) {
     if (this.activeFigure == undefined) { // without active figure
       if (tileClicked.occupiedBy != undefined) { // tile clicked has figure
@@ -55,7 +58,14 @@ export class AppComponent implements OnInit {
         }
       }
       else {
-        this.sendPutNewFigureRequest(this.activeFigure).subscribe(
+        let desiredFigure: AddFigureRequest = {
+          x: tileClicked.x,
+          y: tileClicked.y,
+          player: this.activeFigure.player,
+          figureType: this.activeFigure.figureType
+
+        }
+        this.sendPutNewFigureRequest(desiredFigure).subscribe(
           result => this.onNewFigureSuccess(result),
           error => this.onNewFigureFailure(error)
         );
@@ -78,6 +88,7 @@ export class AppComponent implements OnInit {
   }
 
   onNewFigureSuccess(result: Figure[]) {
+    console.info(result);
     this.cancelSelection();
     this.onFiguresResult(result);
   }
@@ -129,7 +140,7 @@ export class AppComponent implements OnInit {
     this.figuresOnBoard.forEach(fig => this.tiles[fig.x][fig.y].occupiedBy = fig);
   }
 
-  private sendPutNewFigureRequest(newFigure: Figure) {
+  private sendPutNewFigureRequest(newFigure: AddFigureRequest) {
     let requestUrl = this.API_URL;
 
     const httpOptions = {
@@ -211,11 +222,19 @@ interface Position {
   y: number;
 }
 
+interface AddFigureRequest {
+  x: number;
+  y: number;
+  player: string;
+  figureType: string;
+}
+
 interface NewFigure {
   player: string;
   figureType: string;
   imagePath: string;
 }
+
 interface Figure {
   id: string;
   x: number;

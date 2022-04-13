@@ -30,13 +30,11 @@
     </div>
     <div class="right-pane-section">
       active:
-      <div [textContent]="activeFigure?.player + ' ' + activeFigure?.figureType"></div>
-      <div [textContent]="'x=' + activeFigure?.x + ', y=' + activeFigure?.y"></div>
     </div>
     <div class="right-pane-section">
       <!--<div class="section-figures" *ngFor="let figure of figuresOffBoard">
       </div>-->
-        <img class="figures-icons" *ngFor="let figure of figuresOffBoard" src="{{figure?.imagePath}}" />
+        <img class="figures-icons" *ngFor="let figure of figuresOffBoard" src="{{figure?.imagePath}}" (click)="onNewFigureClicked(figure)"/>
     </div>
   </div>
 
