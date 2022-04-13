@@ -3,8 +3,6 @@
 <p *ngIf="!figuresOnBoard"><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationangular">https://aka.ms/jspsintegrationangular</a> for more details.</em></p>
 
 
-
-
 <table *ngIf="figuresOnBoard">
   <tbody>
     <tr *ngFor="let figure of figuresOnBoard">
@@ -12,15 +10,31 @@
     </tr>
   </tbody>
 </table>
-<div class="board-row" *ngIf="tiles">
-  <div class="board-column" *ngFor="let column of tiles">
-    <div class="tile" *ngFor="let tile of column" [ngClass]="tile.class">
-      <div class="tile-position">
-        {{tile.x}}, {{tile.y}}
+<div class="container">
+
+  <div class="board">
+    <div class="board-row" *ngIf="tiles">
+
+      <div class="board-column" *ngFor="let column of tiles">
+        <div class="tile" *ngFor="let tile of column" [ngClass]="tile.class" (click)="onTileClicked(tile)">
+          <div class="tile-position">
+            {{tile.x}}, {{tile.y}}
+          </div>
+          <div class="tile-figure">
+            <img [src]="tile.occupiedBy?.imagePath" />
+          </div>
+        </div>
       </div>
-      <div class="tile-figure">
-        <img [src]="tile.occupiedBy?.imagePath" (click)="onFigureClicked(tile.occupiedBy)" />
-      </div>
+
+
+    </div>
+  </div>
+  <div class="right-pane">
+    <div class="right-pane-section cancel-area" (click)="cancelSelection()">
+      click to cancel selection
+    </div>
+    <div class="right-pane-section">
+      figures
     </div>
   </div>
 
