@@ -1,9 +1,25 @@
 /* You can add global styles to this file, and also import other style files */
 
-.tile {
-    width: 50px;
-    height: 50px;
+.board-column {
+  display: flex;
+  flex-direction: column-reverse;
 }
+.board-row {
+  display: flex;
+  flex-direction: row;
+}
+.tile {
+    width: 80px;
+    height: 80px;
+    border: 1px solid black;
+}
+.tile-position {
+}
+.tile-figure {
+    display: flex;
+    justify-content: center;
+}
+
 .white-tile {
     background-color: #ffd87a;
 }
