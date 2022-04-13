@@ -21,14 +21,17 @@ namespace ChessGameApi.Repositories
             _enPassantFields = database.GetCollection<FieldEntity>(collectionName);
         }
 
-        public async Task<FieldEntity> GetEnPassantFieldAsync()
+        public async Task<FieldEntity?> GetEnPassantFieldAsync()
         {
             List<FieldEntity> fields = await _enPassantFields.Find(new BsonDocument()).ToListAsync();
             if(fields.Count > 1)
             {
                 throw new Exception("More than one en passant fields found.");
+            } else if(fields.Count ==1)
+            {
+                return fields[0];
             }
-            return fields[0];
+            return null;
         }
 
         public async Task NewEnPassantFieldAsync(FieldEntity enPassantField)
