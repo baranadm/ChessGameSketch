@@ -35,6 +35,28 @@ namespace ChessGameApi.Controllers
             return Ok(figures);
         }
 
+        [HttpGet("available")]
+        public ActionResult<IEnumerable<FigureDto>> GetNewFiguresAsync()
+        {
+            List<NewFigureDto> figures = new List<NewFigureDto>()
+            {
+                new NewFigureDto() { Player = "White", FigureType = "Pawn" },
+                new NewFigureDto() { Player = "White", FigureType = "Knight" },
+                new NewFigureDto() { Player = "White", FigureType = "Bishop" },
+                new NewFigureDto() { Player = "White", FigureType = "Rook" },
+                new NewFigureDto() { Player = "White", FigureType = "Queen" },
+                new NewFigureDto() { Player = "White", FigureType = "King" },
+                new NewFigureDto() { Player = "Black", FigureType = "Pawn" },
+                new NewFigureDto() { Player = "Black", FigureType = "Knight" },
+                new NewFigureDto() { Player = "Black", FigureType = "Bishop" },
+                new NewFigureDto() { Player = "Black", FigureType = "Rook" },
+                new NewFigureDto() { Player = "Black", FigureType = "Queen" },
+                new NewFigureDto() { Player = "Black", FigureType = "King" }
+            };
+
+            return Ok(figures);
+        }
+
         //GET /chess/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<FigureDto>> GetFigureAsync(Guid id)
