@@ -34,7 +34,9 @@
       <div [textContent]="'x=' + activeFigure?.x + ', y=' + activeFigure?.y"></div>
     </div>
     <div class="right-pane-section">
-      figures
+      <!--<div class="section-figures" *ngFor="let figure of figuresOffBoard">
+      </div>-->
+        <img class="figures-icons" *ngFor="let figure of figuresOffBoard" src="{{figure?.imagePath}}" />
     </div>
   </div>
 

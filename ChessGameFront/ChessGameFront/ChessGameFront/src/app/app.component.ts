@@ -12,6 +12,7 @@ export class AppComponent implements OnInit {
   private readonly API_URL = 'https://localhost:7024/Chess';
   private readonly httpClient;
   public figuresOnBoard: Figure[] = [];
+  public figuresOffBoard: NewFigure[] = [];
   public tiles: Tile[][] = [];
   public activeFigure?: Figure;
 
@@ -20,12 +21,17 @@ export class AppComponent implements OnInit {
     this.tiles = this.generateBoard();
   }
 
-    private getFiguresFromApi() {
-      return this.httpClient.get<Figure[]>(this.API_URL);
-    }
+  private getFiguresOnBoardFromApi() {
+    return this.httpClient.get<Figure[]>(this.API_URL);
+  }
+
+  private getFiguresOffBoardFromApi() {
+    return this.httpClient.get<Figure[]>(this.API_URL + '/available');
+  }
 
   ngOnInit(): void {
-    this.getFiguresFromApi().subscribe(result => this.onFiguresResult(result), error => console.error(error));
+    this.getFiguresOnBoardFromApi().subscribe(result => this.onFiguresResult(result), error => console.error(error));
+    this.getFiguresOffBoardFromApi().subscribe(result => this.onFiguresOfBoardResult(result), error => console.error());
   }
 
   onTileClicked(tileClicked: Tile) {
@@ -33,9 +39,6 @@ export class AppComponent implements OnInit {
       if (tileClicked.occupiedBy != undefined) { // tile clicked has figure
         this.selectFigureAndShowMoves(tileClicked.occupiedBy as Figure);
       }
-      //else { // tile clicked is free
-      //  this.unmarkAllTiles();
-      //}
     } else if (this.activeFigure != undefined) { // with active figure
       if ("id" in this.activeFigure) { // active figure is on a board
         let activeFromBoard = this.activeFigure as Figure;
@@ -50,6 +53,12 @@ export class AppComponent implements OnInit {
             result => this.onMoveSuccess(result),
             error => this.onMoveFailure(error));
         }
+      }
+      else {
+        this.sendPutNewFigureRequest(this.activeFigure).subscribe(
+          result => this.onNewFigureSuccess(result),
+          error => this.onNewFigureFailure(error)
+        );
       }
     }
   }
@@ -68,12 +77,32 @@ export class AppComponent implements OnInit {
     console.error(error);
   }
 
+  onNewFigureSuccess(result: Figure[]) {
+    this.cancelSelection();
+    this.onFiguresResult(result);
+  }
+
+  onNewFigureFailure(error: any) {
+    this.cancelSelection();
+    console.error(error);
+  }
+
   onFiguresResult(result: Figure[]) {
-    this.reloadFigures(result);
+    this.reloadFiguresOnBoard(result);
     this.refreshAndPopulateTiles();
   }
 
-  reloadFigures(result: Figure[]) {
+  onFiguresOfBoardResult(result: NewFigure[]) {
+    result.forEach(fig => {
+      this.figuresOffBoard.push({
+        player: fig.player,
+        figureType: fig.figureType,
+        imagePath: imagePathFor(fig)
+      });
+    })
+  }
+
+  reloadFiguresOnBoard(result: Figure[]) {
     // cleans board
     this.figuresOnBoard = [];
 
@@ -100,6 +129,19 @@ export class AppComponent implements OnInit {
     this.figuresOnBoard.forEach(fig => this.tiles[fig.x][fig.y].occupiedBy = fig);
   }
 
+  private sendPutNewFigureRequest(newFigure: Figure) {
+    let requestUrl = this.API_URL;
+
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+
+    let request: Observable<Figure[]> = this.httpClient.post<Figure[]>(requestUrl, newFigure, httpOptions);
+    return request;
+  }
+
   private sendMoveFigureRequest(figure: Figure, desiredPosition: Position) {
     let requestUrl = this.API_URL + '/' + figure.id;
 
@@ -114,14 +156,9 @@ export class AppComponent implements OnInit {
   }
 
   private showMovesForFigure(figure: Figure) {
-    //this.unmarkAllTiles();
-    
-    // mark current figure's tile
-    //this.tiles[figure.x][figure.y].class += " tile-to-move";
-
     // mark possible move's tiles
     this.httpClient.get<Position[]>(this.API_URL + '/getAllowedMoves/' + figure.id).subscribe(result => this.markAsAllowedToMove(result));
-    }
+  }
 
   markAsAllowedToMove(result: Position[]): void {
     this.tiles.forEach(row => row.forEach(tile => {
@@ -165,7 +202,7 @@ export class AppComponent implements OnInit {
   title = 'ChessGameFront';
 }
 
-function imagePathFor(fig: Figure): string {
+function imagePathFor(fig: Figure | NewFigure): string {
   return 'assets/pieces/' + fig.figureType.toLowerCase() + fig.player.charAt(0).toUpperCase() + '.png';
 }
 
@@ -174,6 +211,11 @@ interface Position {
   y: number;
 }
 
+interface NewFigure {
+  player: string;
+  figureType: string;
+  imagePath: string;
+}
 interface Figure {
   id: string;
   x: number;
