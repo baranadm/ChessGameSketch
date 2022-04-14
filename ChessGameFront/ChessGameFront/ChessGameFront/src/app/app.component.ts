@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { generate, Observable } from 'rxjs';
+import { ChessApiClientService } from '../service/chess-api-client.service';
 
 @Component({
   selector: 'app-root',
@@ -9,29 +10,20 @@ import { generate, Observable } from 'rxjs';
 })
 
 export class AppComponent implements OnInit {
-  private readonly API_URL = 'https://localhost:7024/Chess';
-  private readonly httpClient;
+  private apiService;
   public figuresOnBoard: Figure[] = [];
   public figuresOffBoard: NewFigure[] = [];
   public tiles: Tile[][] = [];
   public activeFigure?: Figure | NewFigure;
 
-  constructor(http: HttpClient) {
-    this.httpClient = http;
+  constructor(apiService: ChessApiClientService) {
+    this.apiService = apiService;
     this.tiles = this.generateBoard();
   }
 
-  private getFiguresOnBoardFromApi() {
-    return this.httpClient.get<Figure[]>(this.API_URL);
-  }
-
-  private getFiguresOffBoardFromApi() {
-    return this.httpClient.get<Figure[]>(this.API_URL + '/available');
-  }
-
   ngOnInit(): void {
-    this.getFiguresOnBoardFromApi().subscribe(result => this.onFiguresResult(result), error => console.error(error));
-    this.getFiguresOffBoardFromApi().subscribe(result => this.onFiguresOfBoardResult(result), error => console.error());
+    this.apiService.getPlayingFigures().subscribe(result => this.onFiguresResult(result), error => console.error(error));
+    this.apiService.getNewFigures().subscribe(result => this.onFiguresOfBoardResult(result), error => console.error());
   }
 
   onNewFigureClicked(figureClicked: NewFigure) {
@@ -53,7 +45,7 @@ export class AppComponent implements OnInit {
             x: tileClicked.x,
             y: tileClicked.y
           }
-          this.sendMoveFigureRequest(activeFromBoard, desiredPosition).subscribe(
+          this.apiService.moveFigure(activeFromBoard, desiredPosition).subscribe(
             result => this.onMoveSuccess(result),
             error => this.onMoveFailure(error));
         }
@@ -66,7 +58,7 @@ export class AppComponent implements OnInit {
           figureType: this.activeFigure.figureType
 
         }
-        this.sendPutNewFigureRequest(desiredFigure).subscribe(
+        this.apiService.putNewFigure(desiredFigure).subscribe(
           result => this.onNewFigureSuccess(result),
           error => this.onNewFigureFailure(error)
         );
@@ -75,7 +67,7 @@ export class AppComponent implements OnInit {
   }
   selectFigureAndShowMoves(figure: Figure) {
     this.activeFigure = figure;
-    this.showMovesForFigure(figure);
+    this.apiService.getMovesForFigure(figure).subscribe(result => this.markAsAllowedToMove(result));
   }
 
   onMoveSuccess(result: Figure[]) {
@@ -141,37 +133,6 @@ export class AppComponent implements OnInit {
     this.figuresOnBoard.forEach(fig => this.tiles[fig.x][fig.y].occupiedBy = fig);
   }
 
-  private sendPutNewFigureRequest(newFigure: AddFigureRequest) {
-    let requestUrl = this.API_URL;
-
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
-
-    let request: Observable<Figure[]> = this.httpClient.post<Figure[]>(requestUrl, newFigure, httpOptions);
-    return request;
-  }
-
-  private sendMoveFigureRequest(figure: Figure, desiredPosition: Position) {
-    let requestUrl = this.API_URL + '/' + figure.id;
-
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
-
-    let request: Observable<Figure[]> = this.httpClient.put<Figure[]>(requestUrl, desiredPosition, httpOptions);
-    return request;
-  }
-
-  private showMovesForFigure(figure: Figure) {
-    // mark possible move's tiles
-    this.httpClient.get<Position[]>(this.API_URL + '/getAllowedMoves/' + figure.id).subscribe(result => this.markAsAllowedToMove(result));
-  }
-
   markAsAllowedToMove(result: Position[]): void {
     this.tiles.forEach(row => row.forEach(tile => {
       let isAllowedToMove = result.find(move => move.x == tile.x && move.y == tile.y);
@@ -209,8 +170,6 @@ export class AppComponent implements OnInit {
     return tiles;
   }
 
-
-
   title = 'ChessGameFront';
 }
 
@@ -218,12 +177,12 @@ function imagePathFor(fig: Figure | NewFigure): string {
   return 'assets/pieces/' + fig.figureType.toLowerCase() + fig.player.charAt(0).toUpperCase() + '.png';
 }
 
-interface Position {
+export interface Position {
   x: number;
   y: number;
 }
 
-interface AddFigureRequest {
+export interface AddFigureRequest {
   x: number;
   y: number;
   player: string;
@@ -236,7 +195,7 @@ interface NewFigure {
   imagePath: string;
 }
 
-interface Figure {
+export interface Figure {
   id: string;
   x: number;
   y: number;
