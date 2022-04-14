@@ -1,6 +1,9 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { generate, Observable } from 'rxjs';
+import { NewFigureDto } from '../dto/new-figure-dto';
+import { Figure } from '../model/figure';
+import { PlayingFigure } from '../model/playing-figure';
+import { Position } from '../model/position';
+import { Tile } from '../model/tile';
 import { ChessApiClientService } from '../service/chess-api-client.service';
 
 @Component({
@@ -11,10 +14,10 @@ import { ChessApiClientService } from '../service/chess-api-client.service';
 
 export class AppComponent implements OnInit {
   private apiService;
-  public figuresOnBoard: Figure[] = [];
-  public figuresOffBoard: NewFigure[] = [];
+  public figuresOnBoard: PlayingFigure[] = [];
+  public figuresOffBoard: Figure[] = [];
   public tiles: Tile[][] = [];
-  public activeFigure?: Figure | NewFigure;
+  public activeFigure?: PlayingFigure | Figure;
 
   constructor(apiService: ChessApiClientService) {
     this.apiService = apiService;
@@ -22,21 +25,21 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.apiService.getPlayingFigures().subscribe(result => this.onFiguresResult(result), error => console.error(error));
-    this.apiService.getNewFigures().subscribe(result => this.onFiguresOfBoardResult(result), error => console.error());
+    this.apiService.getPlayingFigures().subscribe(result => this.onFiguresResponse(result), error => console.error(error));
+    this.apiService.getNewFigures().subscribe(result => this.onNewFiguresResult(result), error => console.error());
   }
 
-  onNewFigureClicked(figureClicked: NewFigure) {
+  onNewFigureClicked(figureClicked: Figure) {
     this.activeFigure = figureClicked;
   }
   onTileClicked(tileClicked: Tile) {
     if (this.activeFigure == undefined) { // without active figure
       if (tileClicked.occupiedBy != undefined) { // tile clicked has figure
-        this.selectFigureAndShowMoves(tileClicked.occupiedBy as Figure);
+        this.selectFigureAndShowMoves(tileClicked.occupiedBy as PlayingFigure);
       }
     } else if (this.activeFigure != undefined) { // with active figure
       if ("id" in this.activeFigure) { // active figure is on a board
-        let activeFromBoard = this.activeFigure as Figure;
+        let activeFromBoard = this.activeFigure as PlayingFigure;
         if (tileClicked.occupiedBy?.player == activeFromBoard.player) { // if tileClicked has friendly figure
           this.cancelSelection();
           this.selectFigureAndShowMoves(tileClicked.occupiedBy);
@@ -46,12 +49,12 @@ export class AppComponent implements OnInit {
             y: tileClicked.y
           }
           this.apiService.moveFigure(activeFromBoard, desiredPosition).subscribe(
-            result => this.onMoveSuccess(result),
-            error => this.onMoveFailure(error));
+            result => this.onFiguresResponse(result),
+            error => this.onFiguresResponseError(error));
         }
       }
       else {
-        let desiredFigure: AddFigureRequest = {
+        let desiredFigure: NewFigureDto = {
           x: tileClicked.x,
           y: tileClicked.y,
           player: this.activeFigure.player,
@@ -59,44 +62,33 @@ export class AppComponent implements OnInit {
 
         }
         this.apiService.putNewFigure(desiredFigure).subscribe(
-          result => this.onNewFigureSuccess(result),
-          error => this.onNewFigureFailure(error)
+          result => this.onFiguresResponse(result),
+          error => this.onFiguresResponseError(error)
         );
       }
     }
   }
-  selectFigureAndShowMoves(figure: Figure) {
+  selectFigureAndShowMoves(figure: PlayingFigure) {
     this.activeFigure = figure;
     this.apiService.getMovesForFigure(figure).subscribe(result => this.markAsAllowedToMove(result));
   }
 
-  onMoveSuccess(result: Figure[]) {
+  onFiguresResponse(result: PlayingFigure[]) {
     this.cancelSelection();
-    this.onFiguresResult(result);
+    this.refreshContext(result);
   }
 
-  onMoveFailure(error: any) {
-    this.cancelSelection();
-    console.error(error);
-  }
-
-  onNewFigureSuccess(result: Figure[]) {
-    console.info(result);
-    this.cancelSelection();
-    this.onFiguresResult(result);
-  }
-
-  onNewFigureFailure(error: any) {
+  onFiguresResponseError(error: any) {
     this.cancelSelection();
     console.error(error);
   }
 
-  onFiguresResult(result: Figure[]) {
-    this.reloadFiguresOnBoard(result);
-    this.refreshAndPopulateTiles();
+  refreshContext(result: PlayingFigure[]) {
+    this.reloadPlayingFigures(result);
+    this.updateTiles();
   }
 
-  onFiguresOfBoardResult(result: NewFigure[]) {
+  onNewFiguresResult(result: Figure[]) {
     result.forEach(fig => {
       this.figuresOffBoard.push({
         player: fig.player,
@@ -106,7 +98,7 @@ export class AppComponent implements OnInit {
     })
   }
 
-  reloadFiguresOnBoard(result: Figure[]) {
+  reloadPlayingFigures(result: PlayingFigure[]) {
     // cleans board
     this.figuresOnBoard = [];
 
@@ -123,7 +115,7 @@ export class AppComponent implements OnInit {
     })
   }
 
-  refreshAndPopulateTiles() {
+  updateTiles() {
     this.tiles.forEach(
       row => row.forEach(
         tile => tile.occupiedBy = this.figuresOnBoard.find(
@@ -173,43 +165,6 @@ export class AppComponent implements OnInit {
   title = 'ChessGameFront';
 }
 
-function imagePathFor(fig: Figure | NewFigure): string {
+function imagePathFor(fig: PlayingFigure | Figure): string {
   return 'assets/pieces/' + fig.figureType.toLowerCase() + fig.player.charAt(0).toUpperCase() + '.png';
 }
-
-export interface Position {
-  x: number;
-  y: number;
-}
-
-export interface AddFigureRequest {
-  x: number;
-  y: number;
-  player: string;
-  figureType: string;
-}
-
-interface NewFigure {
-  player: string;
-  figureType: string;
-  imagePath: string;
-}
-
-export interface Figure {
-  id: string;
-  x: number;
-  y: number;
-  player: string;
-  figureType: string;
-  imagePath: string;
-}
-
-interface Tile {
-  x: number;
-  y: number;
-  class: string;
-  occupiedBy?: Figure;
-  readablePosition: string;
-  markedToMove: boolean;
-}
-

@@ -1,7 +1,9 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AddFigureRequest, Figure, Position } from '../app/app.component';
+import { NewFigureDto } from '../dto/new-figure-dto';
+import { PlayingFigure } from '../model/playing-figure';
+import { Position } from '../model/position';
 
 @Injectable({
   providedIn: 'root'
@@ -14,15 +16,15 @@ export class ChessApiClientService {
     this.httpClient = http;
   }
 
-  public getPlayingFigures(): Observable<Figure[]> {
-    return this.httpClient.get<Figure[]>(this.API_URL);
+  public getPlayingFigures(): Observable<PlayingFigure[]> {
+    return this.httpClient.get<PlayingFigure[]>(this.API_URL);
   }
 
-  public getNewFigures(): Observable<Figure[]> {
-    return this.httpClient.get<Figure[]>(this.API_URL + '/available');
+  public getNewFigures(): Observable<PlayingFigure[]> {
+    return this.httpClient.get<PlayingFigure[]>(this.API_URL + '/available');
   }
 
-  public putNewFigure(newFigure: AddFigureRequest): Observable<Figure[]> {
+  public putNewFigure(newFigure: NewFigureDto): Observable<PlayingFigure[]> {
     let requestUrl = this.API_URL;
 
     const httpOptions = {
@@ -31,15 +33,15 @@ export class ChessApiClientService {
       })
     };
 
-    let request: Observable<Figure[]> = this.httpClient.post<Figure[]>(requestUrl, newFigure, httpOptions);
+    let request: Observable<PlayingFigure[]> = this.httpClient.post<PlayingFigure[]>(requestUrl, newFigure, httpOptions);
     return request;
   }
 
-  public getMovesForFigure(figure: Figure): Observable<Position[]>  {
+  public getMovesForFigure(figure: PlayingFigure): Observable<Position[]>  {
     return this.httpClient.get<Position[]>(this.API_URL + '/getAllowedMoves/' + figure.id);
   }
 
-  public moveFigure(figure: Figure, desiredPosition: Position): Observable<Figure[]> {
+  public moveFigure(figure: PlayingFigure, desiredPosition: Position): Observable<PlayingFigure[]> {
     let requestUrl = this.API_URL + '/' + figure.id;
 
     const httpOptions = {
@@ -48,7 +50,7 @@ export class ChessApiClientService {
       })
     };
 
-    let request: Observable<Figure[]> = this.httpClient.put<Figure[]>(requestUrl, desiredPosition, httpOptions);
+    let request: Observable<PlayingFigure[]> = this.httpClient.put<PlayingFigure[]>(requestUrl, desiredPosition, httpOptions);
     return request;
   }
 }
