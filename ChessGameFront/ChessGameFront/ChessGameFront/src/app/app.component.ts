@@ -46,7 +46,8 @@ export class AppComponent implements OnInit {
       if ("id" in this.activeFigure) { // active figure is on a board
         let activeFromBoard = this.activeFigure as Figure;
         if (tileClicked.occupiedBy?.player == activeFromBoard.player) { // if tileClicked has friendly figure
-          this.selectFigureAndShowMoves(activeFromBoard);
+          this.cancelSelection();
+          this.selectFigureAndShowMoves(tileClicked.occupiedBy);
         } else { // if tileClicked is free or has opponent
           let desiredPosition: Position = {
             x: tileClicked.x,
