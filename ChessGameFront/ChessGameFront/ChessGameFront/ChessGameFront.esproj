@@ -12,6 +12,7 @@
   <ItemGroup>
     <Folder Include="src\model\" />
     <Folder Include="src\dto\" />
+    <Folder Include="src\manager\" />
     <Folder Include="src\service\" />
   </ItemGroup>
   <!-- This target is copied from the ASP.NET SPA template in order to ensure node_modules are in place. -->

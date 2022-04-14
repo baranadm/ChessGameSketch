@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NewFigureDto } from '../dto/new-figure-dto';
+import { GameManagerService } from '../manager/game-manager.service';
 import { Figure } from '../model/figure';
 import { PlayingFigure } from '../model/playing-figure';
 import { Position } from '../model/position';
@@ -13,79 +14,30 @@ import { ChessApiClientService } from '../service/chess-api-client.service';
 })
 
 export class AppComponent implements OnInit {
-  private apiService;
-  public figuresOnBoard: PlayingFigure[] = [];
+  private apiService: ChessApiClientService;
+  private gameManager: GameManagerService;
   public figuresOffBoard: Figure[] = [];
   public tiles: Tile[][] = [];
-  public activeFigure?: PlayingFigure | Figure;
 
-  constructor(apiService: ChessApiClientService) {
+  constructor(apiService: ChessApiClientService, gameManager: GameManagerService) {
     this.apiService = apiService;
-    this.tiles = this.generateBoard();
+    this.gameManager = gameManager;
   }
 
   ngOnInit(): void {
-    this.apiService.getPlayingFigures().subscribe(result => this.onFiguresResponse(result), error => console.error(error));
     this.apiService.getNewFigures().subscribe(result => this.onNewFiguresResult(result), error => console.error());
+    this.gameManager.getTiles().subscribe(result => this.tiles = result, error => console.error(error));
   }
 
-  onNewFigureClicked(figureClicked: Figure) {
-    this.activeFigure = figureClicked;
+  public cancelSelection() {
+    this.gameManager.cancelSelection();
   }
+
   onTileClicked(tileClicked: Tile) {
-    if (this.activeFigure == undefined) { // without active figure
-      if (tileClicked.occupiedBy != undefined) { // tile clicked has figure
-        this.selectFigureAndShowMoves(tileClicked.occupiedBy as PlayingFigure);
-      }
-    } else if (this.activeFigure != undefined) { // with active figure
-      if ("id" in this.activeFigure) { // active figure is on a board
-        let activeFromBoard = this.activeFigure as PlayingFigure;
-        if (tileClicked.occupiedBy?.player == activeFromBoard.player) { // if tileClicked has friendly figure
-          this.cancelSelection();
-          this.selectFigureAndShowMoves(tileClicked.occupiedBy);
-        } else { // if tileClicked is free or has opponent
-          let desiredPosition: Position = {
-            x: tileClicked.x,
-            y: tileClicked.y
-          }
-          this.apiService.moveFigure(activeFromBoard, desiredPosition).subscribe(
-            result => this.onFiguresResponse(result),
-            error => this.onFiguresResponseError(error));
-        }
-      }
-      else {
-        let desiredFigure: NewFigureDto = {
-          x: tileClicked.x,
-          y: tileClicked.y,
-          player: this.activeFigure.player,
-          figureType: this.activeFigure.figureType
-
-        }
-        this.apiService.putNewFigure(desiredFigure).subscribe(
-          result => this.onFiguresResponse(result),
-          error => this.onFiguresResponseError(error)
-        );
-      }
-    }
+    this.gameManager.onTileClicked(tileClicked);
   }
-  selectFigureAndShowMoves(figure: PlayingFigure) {
-    this.activeFigure = figure;
-    this.apiService.getMovesForFigure(figure).subscribe(result => this.markAsAllowedToMove(result));
-  }
-
-  onFiguresResponse(result: PlayingFigure[]) {
-    this.cancelSelection();
-    this.refreshContext(result);
-  }
-
-  onFiguresResponseError(error: any) {
-    this.cancelSelection();
-    console.error(error);
-  }
-
-  refreshContext(result: PlayingFigure[]) {
-    this.reloadPlayingFigures(result);
-    this.updateTiles();
+  onNewFigureClicked(figureClicked: Figure) {
+    this.gameManager.setNewFigureAsActive(figureClicked);
   }
 
   onNewFiguresResult(result: Figure[]) {
@@ -98,73 +50,10 @@ export class AppComponent implements OnInit {
     })
   }
 
-  reloadPlayingFigures(result: PlayingFigure[]) {
-    // cleans board
-    this.figuresOnBoard = [];
-
-    // populates figures array with mapped result's figures
-    result.forEach(fig => {
-      this.figuresOnBoard.push({
-        id: fig.id,
-        x: fig.x,
-        y: fig.y,
-        player: fig.player,
-        figureType: fig.figureType,
-        imagePath: imagePathFor(fig)
-      });
-    })
-  }
-
-  updateTiles() {
-    this.tiles.forEach(
-      row => row.forEach(
-        tile => tile.occupiedBy = this.figuresOnBoard.find(
-          fig => fig.x == tile.x && fig.y == tile.y)
-      )
-    );
-    this.figuresOnBoard.forEach(fig => this.tiles[fig.x][fig.y].occupiedBy = fig);
-  }
-
-  markAsAllowedToMove(result: Position[]): void {
-    this.tiles.forEach(row => row.forEach(tile => {
-      let isAllowedToMove = result.find(move => move.x == tile.x && move.y == tile.y);
-      if (isAllowedToMove) {
-        tile.markedToMove = true;
-      }
-    }))
-  }
-
-  cancelSelection() {
-    this.activeFigure = undefined;
-    this.unmarkAllTiles();
-  }
-
-  unmarkAllTiles() {
-    this.tiles.forEach(row => row.forEach(tile => {
-      tile.markedToMove = false;
-    }))
-  }
-
-  generateBoard(): Tile[][] {
-    let tiles: Tile[][] = [];
-    let asciiNumberOfLetterA = 65;
-    for (let x = 0; x <= 7; x++) {
-      let readableRowNumber: string = (-(x - 8)).toString();
-      let column: Tile[] = [];
-      for (let y = 0; y <= 7; y++) {
-        let readableColumnName = String.fromCharCode(asciiNumberOfLetterA + y);
-        let currentTileClass = (x + y) % 2 == 0 ? 'tile-black' : 'tile-white';
-        let tile: Tile = { x: x, y: y, class: currentTileClass, occupiedBy: undefined, readablePosition: readableColumnName + readableRowNumber, markedToMove: false };
-        column[y] = tile;
-      }
-      tiles[x] = column;
-    }
-    return tiles;
-  }
-
   title = 'ChessGameFront';
 }
 
-function imagePathFor(fig: PlayingFigure | Figure): string {
+//TODO export creation to another file
+export function imagePathFor(fig: PlayingFigure | Figure): string {
   return 'assets/pieces/' + fig.figureType.toLowerCase() + fig.player.charAt(0).toUpperCase() + '.png';
 }
