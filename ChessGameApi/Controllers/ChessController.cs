@@ -157,13 +157,7 @@ namespace ChessGameApi.Controllers
             }
             else
             {
-                return Problem(
-                            type: "/docs/errors/forbidden",
-                            title: "Move is forbidden.",
-                            detail: $"Figure can not move to desired field.",
-                            statusCode: StatusCodes.Status403Forbidden,
-                            instance: HttpContext.Request.Path
-                       );
+                return BadRequest("Figure is not allowed to move on selected field.");
             }
         }
 

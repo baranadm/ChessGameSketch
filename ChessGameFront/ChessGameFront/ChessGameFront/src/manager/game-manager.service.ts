@@ -106,7 +106,7 @@ export class GameManagerService {
   private onFiguresResponseError(error: HttpErrorResponse) {
     this.cancelSelection();
     console.error(error);
-    this.shareMessage(error.error?.detail);
+    this.shareMessage(error.error);
   }
 
   private onAllowedMovesResponse(result: Position[]): void {

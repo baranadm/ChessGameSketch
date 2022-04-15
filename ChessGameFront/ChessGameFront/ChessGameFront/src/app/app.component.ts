@@ -71,7 +71,7 @@ export class AppComponent implements OnInit {
   title = 'ChessGameFront';
 
   handleError(error: HttpErrorResponse) {
-    this.message = error.error?.detail;
+    this.message = error.error;
     console.log(error);
   }
 }
