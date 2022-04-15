@@ -27,8 +27,8 @@ namespace ChessGameApi.Controllers
             this.chessValidator = chessValidator;
         }
 
-        //GET /chess
-        [HttpGet]
+        //GET /chess/figures
+        [HttpGet("figures")]
         public async Task<ActionResult<IEnumerable<FigureDto>>> GetFiguresAsync()
         {
             var figures = (await figureRepository.GetFiguresAsync())
@@ -36,8 +36,8 @@ namespace ChessGameApi.Controllers
             return Ok(figures);
         }
 
-        //GET /chess/available
-        [HttpGet("available")]
+        //GET /chess/figures/available
+        [HttpGet("figures/available")]
         public ActionResult<IEnumerable<FigureDto>> GetNewFiguresAsync()
         {
             List<NewFigureDto> figures = new List<NewFigureDto>()
@@ -59,8 +59,8 @@ namespace ChessGameApi.Controllers
             return Ok(figures);
         }
 
-        //GET /chess/{id}
-        [HttpGet("{id}")]
+        //GET /chess/figures/{id}
+        [HttpGet("figures{id}")]
         public async Task<ActionResult<FigureDto>> GetFigureAsync(Guid id)
         {
             var figure = await figureRepository.GetFigureAsync(id);
@@ -71,8 +71,8 @@ namespace ChessGameApi.Controllers
             return figure.AsDto();
         }
 
-        // POST /chess
-        [HttpPost]
+        // POST /chess/figures
+        [HttpPost("figures")]
         public async Task<ActionResult<IEnumerable<FigureDto>>> CreateFigureAsync(CreateFigureDto newFigureDto)
         {
             if(await figureRepository.HasFigureAtAsync(newFigureDto.X, newFigureDto.Y)) {
@@ -92,8 +92,8 @@ namespace ChessGameApi.Controllers
             return await GetFiguresAsync();
         }
 
-        // PUT /chess/{id}
-        [HttpPut("{id}")]
+        // PUT /chess/figures/{id}
+        [HttpPut("figures/{id}")]
         public async Task<ActionResult<IEnumerable<FigureDto>>> MoveFigureAsync(Guid id, MoveFigureDto desiredFigureDto)
         {
             FigureEntity existingFigure;
@@ -161,8 +161,8 @@ namespace ChessGameApi.Controllers
             }
         }
 
-        // DELETE /Chess/{id}
-        [HttpDelete("{id}")]
+        // DELETE /Chess/figures/{id}
+        [HttpDelete("figures/{id}")]
         public async Task<ActionResult> DeleteFigureAsync(Guid id)
         {
             var existingFigure = await figureRepository.GetFigureAsync(id);

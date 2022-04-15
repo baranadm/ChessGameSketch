@@ -17,15 +17,15 @@ export class ChessApiClientService {
   }
 
   public getPlayingFigures(): Observable<PlayingFigure[]> {
-    return this.httpClient.get<PlayingFigure[]>(this.API_URL);
+    return this.httpClient.get<PlayingFigure[]>(this.API_URL +'/figures');
   }
 
   public getNewFigures(): Observable<PlayingFigure[]> {
-    return this.httpClient.get<PlayingFigure[]>(this.API_URL + '/available');
+    return this.httpClient.get<PlayingFigure[]>(this.API_URL + '/figures/available');
   }
 
   public putNewFigure(newFigure: NewFigureDto): Observable<PlayingFigure[]> {
-    let requestUrl = this.API_URL;
+    let requestUrl = this.API_URL + '/figures';
 
     const httpOptions = {
       headers: new HttpHeaders({
@@ -42,7 +42,7 @@ export class ChessApiClientService {
   }
 
   public moveFigure(figure: PlayingFigure, desiredPosition: Position): Observable<PlayingFigure[]> {
-    let requestUrl = this.API_URL + '/' + figure.id;
+    let requestUrl = this.API_URL + '/figures/' + figure.id;
 
     const httpOptions = {
       headers: new HttpHeaders({
