@@ -3,7 +3,7 @@ import { not } from '@angular/compiler/src/output/output_ast';
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { imagePathFor } from '../app/app.component';
-import { NewFigureDto } from '../dto/new-figure-dto';
+import { PutFigureDto } from '../dto/put-figure-dto';
 import { Figure } from '../model/figure';
 import { PlayingFigure } from '../model/playing-figure';
 import { Position } from '../model/position';
@@ -68,7 +68,7 @@ export class GameManagerService {
 
   private putFigure(tileClicked: Tile, newFigure: Figure) {
     console.info(`Action: put figure`);
-    let desiredFigure: NewFigureDto = {
+    let desiredFigure: PutFigureDto = {
       x: tileClicked.x,
       y: tileClicked.y,
       player: newFigure.player,

@@ -4,7 +4,6 @@ import { NewFigureDto } from '../dto/new-figure-dto';
 import { GameManagerService } from '../manager/game-manager.service';
 import { Figure } from '../model/figure';
 import { PlayingFigure } from '../model/playing-figure';
-import { Position } from '../model/position';
 import { Tile } from '../model/tile';
 import { ChessApiClientService } from '../service/chess-api-client.service';
 
@@ -58,8 +57,9 @@ export class AppComponent implements OnInit {
     this.showMessage(figureClicked);
   }
 
-  onNewFiguresResult(result: Figure[]) {
+  onNewFiguresResult(result: NewFigureDto[]) {
     result.forEach(fig => {
+      
       this.figuresOffBoard.push({
         player: fig.player,
         figureType: fig.figureType,
@@ -78,6 +78,6 @@ export class AppComponent implements OnInit {
 
 
 //TODO export creation to another file
-export function imagePathFor(fig: PlayingFigure | Figure): string {
+export function imagePathFor(fig: PlayingFigure | Figure | NewFigureDto): string {
   return 'assets/pieces/' + fig.figureType.toLowerCase() + fig.player.charAt(0).toUpperCase() + '.png';
 }

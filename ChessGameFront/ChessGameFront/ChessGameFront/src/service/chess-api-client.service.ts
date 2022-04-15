@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { NewFigureDto } from '../dto/new-figure-dto';
+import { PutFigureDto } from '../dto/put-figure-dto';
 import { PlayingFigure } from '../model/playing-figure';
 import { Position } from '../model/position';
 
@@ -20,11 +21,11 @@ export class ChessApiClientService {
     return this.httpClient.get<PlayingFigure[]>(this.API_URL +'/figures');
   }
 
-  public getNewFigures(): Observable<PlayingFigure[]> {
-    return this.httpClient.get<PlayingFigure[]>(this.API_URL + '/figures/available');
+  public getNewFigures(): Observable<NewFigureDto[]> {
+    return this.httpClient.get<NewFigureDto[]>(this.API_URL + '/figures/available');
   }
 
-  public putNewFigure(newFigure: NewFigureDto): Observable<PlayingFigure[]> {
+  public putNewFigure(newFigure: PutFigureDto): Observable<PlayingFigure[]> {
     let requestUrl = this.API_URL + '/figures';
 
     const httpOptions = {
