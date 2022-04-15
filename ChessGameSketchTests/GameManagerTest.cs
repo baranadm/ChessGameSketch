@@ -1,5 +1,4 @@
 ﻿using ChessGameSketch;
-using ChessGameSketch.Board;
 using ChessGameSketch.Validator;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
