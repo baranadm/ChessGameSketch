@@ -35,6 +35,7 @@ namespace ChessGameApi.Controllers
             return Ok(figures);
         }
 
+        //GET /chess/available
         [HttpGet("available")]
         public ActionResult<IEnumerable<FigureDto>> GetNewFiguresAsync()
         {
@@ -81,7 +82,6 @@ namespace ChessGameApi.Controllers
                 Player = newFigureDto.Player,
                 FigureType = newFigureDto.FigureType
             };
-
 
             await figureRepository.CreateFigureAsync(figureEntity);
             return await GetFiguresAsync();
