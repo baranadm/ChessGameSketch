@@ -7,6 +7,11 @@ namespace ChessGameApi.Extensions
 {
     public static class Extensions
     {
+        public static void Add(this List<NewFigureDto> newFigures, string player, string figureType)
+        {
+            newFigures.Add(new NewFigureDto() { Player = player, FigureType = figureType });
+        }
+
         public static FigureDto AsDto(this FigureEntity figureEntity)
         {
             return new FigureDto

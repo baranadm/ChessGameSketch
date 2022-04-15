@@ -39,18 +39,18 @@ namespace ChessGameApi.Services
         {
             List<NewFigureDto> figures = new List<NewFigureDto>()
             {
-                new NewFigureDto() { Player = "White", FigureType = "Pawn" },
-                new NewFigureDto() { Player = "White", FigureType = "Knight" },
-                new NewFigureDto() { Player = "White", FigureType = "Bishop" },
-                new NewFigureDto() { Player = "White", FigureType = "Rook" },
-                new NewFigureDto() { Player = "White", FigureType = "Queen" },
-                new NewFigureDto() { Player = "White", FigureType = "King" },
-                new NewFigureDto() { Player = "Black", FigureType = "Pawn" },
-                new NewFigureDto() { Player = "Black", FigureType = "Knight" },
-                new NewFigureDto() { Player = "Black", FigureType = "Bishop" },
-                new NewFigureDto() { Player = "Black", FigureType = "Rook" },
-                new NewFigureDto() { Player = "Black", FigureType = "Queen" },
-                new NewFigureDto() { Player = "Black", FigureType = "King" }
+                { "White", "Knight" },
+                { "White", "Pawn" },
+                { "White", "Bishop" },
+                { "White", "Rook" },
+                { "White", "Queen" },
+                { "White", "King" },
+                { "Black", "Pawn" },
+                { "Black", "Knight" },
+                { "Black", "Bishop" },
+                { "Black", "Rook" },
+                { "Black", "Queen" },
+                { "Black", "King" }
             };
             return figures;
         }
