@@ -75,6 +75,10 @@ namespace ChessGameApi.Controllers
         [HttpPost]
         public async Task<ActionResult<IEnumerable<FigureDto>>> CreateFigureAsync(CreateFigureDto newFigureDto)
         {
+            if(await figureRepository.HasFigureAtAsync(newFigureDto.X, newFigureDto.Y)) {
+                return BadRequest("Selected position is occupied by another figure.");
+            }
+
             FigureEntity figureEntity = new()
             {
                 Id = Guid.NewGuid(),

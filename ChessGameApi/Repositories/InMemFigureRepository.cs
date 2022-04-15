@@ -67,5 +67,10 @@ namespace ChessGameApi.Repositories
                 throw new FigureNotFoundException($"Figure with x={x}, y={y} has not been found.");
             }
         }
+
+        public Task<bool> HasFigureAtAsync(int x, int y)
+        {
+            return Task.FromResult(figures.Exists((fig) => fig.X == x && fig.Y == y));
+        }
     }
 }

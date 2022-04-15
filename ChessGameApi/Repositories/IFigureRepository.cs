@@ -10,5 +10,6 @@ namespace ChessGameApi.Repositories
         Task UpdateFigureAsync(FigureEntity figure);
         Task DeleteFigureAsync(Guid id);
         Task DeleteFigureAtPositionAsync(int x, int y);
+        Task<bool> HasFigureAtAsync(int x, int y);
     }
 }
