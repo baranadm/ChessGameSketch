@@ -1,5 +1,6 @@
 ﻿using ChessGameApi.Dtos;
 using ChessGameApi.Entities;
+using ChessGameApi.Exceptions;
 using ChessGameApi.Extensions;
 using ChessGameApi.Repositories;
 using ChessGameSketch;
@@ -91,15 +92,30 @@ namespace ChessGameApi.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<IEnumerable<FigureDto>>> MoveFigureAsync(Guid id, MoveFigureDto desiredFigureDto)
         {
-            var existingFigure = await figureRepository.GetFigureAsync(id);
-            if (existingFigure is null)
+            FigureEntity existingFigure;
+            try
             {
-                return NotFound($"Figure with id: {id} has not been found.");
+                existingFigure = await figureRepository.GetFigureAsync(id);
+            }
+            catch (ChessApiException e)
+            {
+                return NotFound(e.Message);
             }
 
-            FieldDto desiredPosition = new FieldDto() { X = desiredFigureDto.X, Y = desiredFigureDto.Y };
             // validate move
-            if (GetAllowedPositions(id).Result.Value.Contains(desiredPosition))
+
+            List<Vector2> allowedMoves;
+            try
+            {
+                allowedMoves = await FindAllowedMoves(id);
+            }
+            catch (ChessApiException e)
+            {
+                return BadRequest(e.Message);
+            }
+
+            Vector2 desiredPosition = new Vector2(desiredFigureDto.X, desiredFigureDto.Y);
+            if (allowedMoves.Contains(desiredPosition))
             {
                 //handle en passant
                 await enPassantRepository.ClearEnPassantFieldAsync();
@@ -118,7 +134,11 @@ namespace ChessGameApi.Controllers
                 }
 
                 //remove figure on desired position, if any
-                await figureRepository.DeleteFigureAtPositionAsync(desiredPosition.X, desiredPosition.Y);
+                try
+                {
+                    await figureRepository.DeleteFigureAtPositionAsync((int) desiredPosition.X, (int) desiredPosition.Y);
+                } catch (FigureNotFoundException)
+                { }
 
                 //make move
                 FigureEntity afterMove = existingFigure with
@@ -160,22 +180,40 @@ namespace ChessGameApi.Controllers
         [HttpGet("getAllowedMoves/{id}")]
         public async Task<ActionResult<List<FieldDto>>> GetAllowedPositions(Guid id)
         {
+            try
+            {
+                List<Vector2> allowedMoves = await FindAllowedMoves(id);
+                return allowedMoves.Select(vec => vec.AsFieldDto()).ToList();
+            } catch (ChessApiException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
+        private async Task<List<Vector2>> FindAllowedMoves(Guid id)
+        {
             List<Figure> figuresOnBoard = (await figureRepository.GetFiguresAsync()).Select(fig => fig.AsFigure()).ToList();
             Board board = new Board(figuresOnBoard);
 
             // check for enPassantField
             FieldEntity? enPassant = await enPassantRepository.GetEnPassantFieldAsync();
+
             if (enPassant != null) board.EnPassantField = enPassant.AsVector2();
 
-            Figure figureInspected = (await figureRepository.GetFigureAsync(id)).AsFigure();
-            if (figureInspected is null)
+            Figure figureInspected;
+            try
             {
-                return NotFound();
+                figureInspected = (await figureRepository.GetFigureAsync(id)).AsFigure();
             }
-            List<Vector2> allowedMoves = chessValidator.GetAllowedMoves(board, figureInspected);
+            catch (ChessApiException)
+            {
+                throw;
+            }
 
-            return allowedMoves.Select(vec => vec.AsFieldDto()).ToList();
+            List<Vector2> allowedMoves = chessValidator.GetAllowedMoves(board, figureInspected);
+            return allowedMoves;
+
+
         }
 
     }

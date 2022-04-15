@@ -1,41 +1,71 @@
 ﻿using ChessGameApi.Entities;
+using ChessGameApi.Exceptions;
 
 namespace ChessGameApi.Repositories
 {
     public class InMemFigureRepository : IFigureRepository
     {
-        private readonly List<FigureEntity> figures = new()
-        {
-            new FigureEntity { Id = Guid.NewGuid(), X = 0, Y = 1, FigureType = "Pawn", Player = "White" },
-            new FigureEntity { Id = Guid.NewGuid(), X = 1, Y = 1, FigureType = "Pawn", Player = "White" },
-            new FigureEntity { Id = Guid.NewGuid(), X = 0, Y = 0, FigureType = "Rook", Player = "White" }
-        };
+        private readonly List<FigureEntity> figures = new();
 
-        public IEnumerable<FigureEntity> GetFigures()
+        public Task<FigureEntity> GetFigureAsync(Guid id)
         {
-            return figures;
+            try
+            {
+                return Task.FromResult(figures.Single(f => f.Id == id));
+            } catch (InvalidOperationException e)
+            {
+                throw new ChessApiException($"Figure with id={id} has not been found, or there is more than one figure with this id.");
+            }
         }
 
-        public FigureEntity GetFigure(Guid id)
+        public Task<IEnumerable<FigureEntity>> GetFiguresAsync()
         {
-            return figures.Where(f => f.Id == id).SingleOrDefault();
+            return Task.FromResult(figures.AsEnumerable());
         }
 
-        public void CreateFigure(FigureEntity figure)
+        public Task CreateFigureAsync(FigureEntity figure)
         {
             figures.Add(figure);
+            return Task.CompletedTask;
         }
 
-        public void UpdateFigure(FigureEntity figure)
+        public Task UpdateFigureAsync(FigureEntity figure)
         {
             var index = figures.FindIndex(fig => fig.Id == figure.Id);
+            if(index == -1)
+            {
+                throw new FigureNotFoundException($"Figure with id={figure.Id} has not been found.");
+            }
             figures[index] = figure;
+            return Task.CompletedTask;
         }
 
-        public void DeleteFigure(Guid id)
+        public Task DeleteFigureAsync(Guid id)
         {
             var index = figures.FindIndex(fig => fig.Id == id);
-            figures.RemoveAt(index);
+            try
+            {
+                figures.RemoveAt(index);
+                return Task.CompletedTask;
+            } catch (ArgumentOutOfRangeException)
+            {
+                throw new FigureNotFoundException($"Figure with id={id} has not been found.");
+            }
+        }
+
+        public Task DeleteFigureAtPositionAsync(int x, int y)
+        {
+            var index = figures.FindIndex((fig) => fig.X == x && fig.Y == y);
+
+            try
+            {
+                figures.RemoveAt(index);
+                return Task.CompletedTask;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                throw new FigureNotFoundException($"Figure with x={x}, y={y} has not been found.");
+            }
         }
     }
 }

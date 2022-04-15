@@ -17,7 +17,7 @@ namespace ChessGameSketch
         {
             FiguresOnBoard = withFigures;
         }
-        
+
         public void PutFigure(Figure newFigure)
         {
             if (newFigure.Position.X < 0 || newFigure.Position.X > 7 || newFigure.Position.Y < 0 || newFigure.Position.Y > 7)
@@ -25,12 +25,12 @@ namespace ChessGameSketch
             if (FigureOn(newFigure.Position) != null) throw new FieldOccupiedException($"Field {newFigure.Position} is occupied another figure");
             FiguresOnBoard.Add(newFigure);
         }
-        
+
         public void MoveFigure(Figure figure, Vector2 newPosition)
         {
             Figure? chosen = FindFigure(figure);
             if (chosen == null) throw new FigureNotFoundException();
-            if(FigureOn(newPosition) != null && FigureOn(newPosition).SamePlayerAs(chosen))
+            if (FigureOn(newPosition) != null && FigureOn(newPosition).SamePlayerAs(chosen))
                 throw new FieldOccupiedException($"Field {newPosition} is occupied by friendly figure");
 
             HandleEnPassantField(figure, newPosition);
@@ -53,7 +53,7 @@ namespace ChessGameSketch
         {
             return FiguresOnBoard.Find(fig => fig.Position.Equals(position));
         }
-        
+
         private Figure? FindFigure(Figure figure)
         {
             return FiguresOnBoard.Find(f => f.Equals(figure));
@@ -82,8 +82,8 @@ namespace ChessGameSketch
 
         private void MarkEnPassantIfRequired(Figure figure, Vector2 newPosition)
         {
-            if(figure.FigureType() == FigureType.Pawn)
-                if(Vector2.Distance(figure.Position, newPosition) == 2)
+            if (figure.FigureType() == FigureType.Pawn)
+                if (Vector2.Distance(figure.Position, newPosition) == 2)
                     EnPassantField = Vector2.Divide(Vector2.Add(figure.Position, newPosition), new Vector2(0, 2));
         }
 
