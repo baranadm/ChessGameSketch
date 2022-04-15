@@ -4,7 +4,7 @@ namespace ChessGameApi.Repositories
 {
     public interface IFigureRepository
     {
-        Task<FigureEntity> GetFigureAsync(Guid id);
+        Task<FigureEntity?> GetFigureAsync(Guid id);
         Task<IEnumerable<FigureEntity>> GetFiguresAsync();
         Task CreateFigureAsync(FigureEntity figure);
         Task UpdateFigureAsync(FigureEntity figure);

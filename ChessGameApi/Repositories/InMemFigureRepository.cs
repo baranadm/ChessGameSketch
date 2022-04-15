@@ -7,15 +7,9 @@ namespace ChessGameApi.Repositories
     {
         private readonly List<FigureEntity> figures = new();
 
-        public Task<FigureEntity> GetFigureAsync(Guid id)
+        public Task<FigureEntity?> GetFigureAsync(Guid id)
         {
-            try
-            {
-                return Task.FromResult(figures.Single(f => f.Id == id));
-            } catch (InvalidOperationException e)
-            {
-                throw new ChessApiException($"Figure with id={id} has not been found, or there is more than one figure with this id.");
-            }
+            return Task.FromResult(figures.SingleOrDefault(f => f.Id == id));
         }
 
         public Task<IEnumerable<FigureEntity>> GetFiguresAsync()
@@ -32,7 +26,7 @@ namespace ChessGameApi.Repositories
         public Task UpdateFigureAsync(FigureEntity figure)
         {
             var index = figures.FindIndex(fig => fig.Id == figure.Id);
-            if(index == -1)
+            if (index == -1)
             {
                 throw new FigureNotFoundException($"Figure with id={figure.Id} has not been found.");
             }
@@ -47,7 +41,8 @@ namespace ChessGameApi.Repositories
             {
                 figures.RemoveAt(index);
                 return Task.CompletedTask;
-            } catch (ArgumentOutOfRangeException)
+            }
+            catch (ArgumentOutOfRangeException)
             {
                 throw new FigureNotFoundException($"Figure with id={id} has not been found.");
             }

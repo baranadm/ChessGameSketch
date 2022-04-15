@@ -1,7 +1,6 @@
-using ChessGameApi.Entities;
 using ChessGameApi.Repositories;
+using ChessGameApi.Services;
 using ChessGameSketch.Validator;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +21,7 @@ builder.Services.AddControllers(options => options.SuppressAsyncSuffixInActionNa
 builder.Services.AddSingleton<IFigureRepository, InMemFigureRepository>();
 builder.Services.AddSingleton<IEnPassantRepository, InMemEnPassantRepository>();
 builder.Services.AddSingleton<IChessValidator, ChessValidator>();
-builder.Services.AddDbContext<FigureContext>(opt => opt.UseInMemoryDatabase("Figures"));
+builder.Services.AddSingleton<IBoardService, BoardService>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
