@@ -11,7 +11,13 @@ import { Position } from '../model/position';
 })
 export class ChessApiClientService {
   private readonly API_URL = 'https://localhost:7024/Chess';
+  private readonly httpOptions = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    })
+  };
   private readonly httpClient;
+
 
   constructor(http: HttpClient) {
     this.httpClient = http;
@@ -28,13 +34,8 @@ export class ChessApiClientService {
   public putNewFigure(newFigure: PutFigureDto): Observable<PlayingFigure[]> {
     let requestUrl = this.API_URL + '/figures';
 
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
 
-    let request: Observable<PlayingFigure[]> = this.httpClient.post<PlayingFigure[]>(requestUrl, newFigure, httpOptions);
+    let request: Observable<PlayingFigure[]> = this.httpClient.post<PlayingFigure[]>(requestUrl, newFigure, this.httpOptions);
     return request;
   }
 
@@ -45,13 +46,7 @@ export class ChessApiClientService {
   public moveFigure(figure: PlayingFigure, desiredPosition: Position): Observable<PlayingFigure[]> {
     let requestUrl = this.API_URL + '/figures/' + figure.id;
 
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
-
-    let request: Observable<PlayingFigure[]> = this.httpClient.put<PlayingFigure[]>(requestUrl, desiredPosition, httpOptions);
+    let request: Observable<PlayingFigure[]> = this.httpClient.put<PlayingFigure[]>(requestUrl, desiredPosition, this.httpOptions);
     return request;
   }
 }
