@@ -43,16 +43,19 @@ export class AppComponent implements OnInit {
   }
   private showMessage(clicked: any) {
 
-    if ("x" in clicked) {
-      this.message = `Tile [${clicked.x}, ${clicked.y}] selected.`;
-      if (clicked.occupiedBy) this.message = `${clicked.occupiedBy.player} ${clicked.occupiedBy.figureType} selected`;
-      else this.message += ' No figure selected.';
+    if ("occupiedBy" in clicked) {
+      this.message = `Selected tile [${clicked.x}, ${clicked.y}]`;
+      if (clicked.occupiedBy) this.message += ` with ${clicked.occupiedBy.player} ${clicked.occupiedBy.figureType}.`;
+      else this.message += ' with no figure.';
+    } else if ("player" in clicked && !("x" in clicked)){
+      this.message = `New ${clicked.player} ${clicked.figureType} selected.`;
+
     }
   }
 
   onNewFigureClicked(figureClicked: Figure) {
     this.gameManager.setNewFigureAsActive(figureClicked);
-    this.message = `${figureClicked.player} ${figureClicked.figureType} selected`;
+    this.showMessage(figureClicked);
   }
 
   onNewFiguresResult(result: Figure[]) {
