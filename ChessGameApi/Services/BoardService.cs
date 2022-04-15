@@ -86,8 +86,14 @@ namespace ChessGameApi.Services
                 throw new MoveNotAllowedException($"Move from [{existingFigure.X}, {existingFigure.Y}] to [{newPosition.X}, {newPosition.Y}] is not allowed.");
             }
 
-            await handleEnPassant(newPosition, existingFigure);
             await takeFigureIfExists(newPosition);
+
+            if(existingFigure.FigureType == "Pawn")
+            {
+                takeFigureIfEnPassant(newPosition);
+            }
+
+            await handleEnPassant(newPosition, existingFigure);
 
             FigureEntity afterMove = existingFigure with
             {
@@ -107,6 +113,21 @@ namespace ChessGameApi.Services
             }
             catch (FigureNotFoundException)
             { }
+        }
+        private async void takeFigureIfEnPassant(FieldDto newPosition)
+        {
+            FieldEntity? enPassantField = await enPassantRepository.GetEnPassantFieldAsync();
+            if(enPassantField != null && enPassantField.X == newPosition.X && enPassantField.Y == newPosition.Y)
+            {
+                if(enPassantField.Y == 2)
+                {
+                    await figureRepository.DeleteFigureAtPositionAsync(enPassantField.X, 3);
+                }
+                if (enPassantField.Y == 5)
+                {
+                    await figureRepository.DeleteFigureAtPositionAsync(enPassantField.X, 4);
+                }
+            }
         }
 
         private async Task handleEnPassant(FieldDto newPosition, FigureEntity existingFigure)
