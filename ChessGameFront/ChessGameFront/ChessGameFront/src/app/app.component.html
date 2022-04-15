@@ -47,4 +47,32 @@
       </div>
     </div>
   </div>
+
 </div>
+<h1>Opis rozwiązania</h1>
+<p>Rozwiązanie składa się z następujących projektów:  </p>
+<ol>
+  <li>ChessGameSketch - zawiera logikę związaną z obliczaniem możliwych ruchów i walidacją podejmowanych akcji.</li>
+  <li>ChessGameSketchTest - zawiera testy walidatora.</li>
+  <li>ChessGameSketchApi - odpowiada za udostępnenie endpointów, przyjmowanie zapytań dot. ruchów i możliwych ruchów, zapisywanie pozycji figur i ew. pola en passant (bicie w przelocie).</li>
+  <li>ChessGameSketchFrony - odpowiada interfejs graficzny (wykonane w Angular).</li>
+</ol>
+<p>Backend udostępnia figury możliwe do postawienia na planszy, dodawanie figur do planszy, wykonywanie ruchów, usuwanie figur i udostępnianie możliwych ruchów dla danej figury w kontekscie wszystkich figur na planszy.</p>
+
+<h2>Algorytm walidacji:</h2>
+<p>Nie zezwala na:</p>
+<ol>
+  <li>ruchy wykraczające poza pole gry,</li>
+  <li>ruchy narażające króla na szacha,</li>
+  <li>postawienie nowej figurki na innej figurze,</li>
+</ol>
+<p>Zezwala na:</p>
+<ol>
+  <li>bicie innych figur (także w przelocie),</li>
+  <li>ruchy zgodne z zasadami,</li>
+</ol>
+
+<h2>Front end:</h2>
+<p>Komponent <b>app.component</b> odpowiada za wyświetlanie interfejsu użytkownika, wykrywanie akcji (click) i zarządzanie nowymi figurkami.</p>
+<p>Podejmowanie akcji, generowanie widoku planszy z figurami oraz wyświetlanie wiadomości z backendu jest realizowane przez serwis <b>game.manager</b>.</p>
+<p>Widok planszy (tablica pól - Tile[][]) oraz wiadomości dla użytkownika są przekazywane za pośrednictwem interfejsów Subject z <b>game.manager</b> do <b>app.component</b>.</p>
