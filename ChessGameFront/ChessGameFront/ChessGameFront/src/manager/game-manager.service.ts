@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { not } from '@angular/compiler/src/output/output_ast';
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
@@ -17,18 +18,22 @@ export class GameManagerService {
   private figuresOnBoard: PlayingFigure[] = [];
   private activeFigure?: PlayingFigure | Figure;
   private tiles: Tile[][] = [];
-  private subject = new Subject<Tile[][]>();
+  private tilesSubject = new Subject<Tile[][]>();
+  private messageSubject = new Subject<string>();
 
   constructor(apiService: ChessApiClientService) {
     this.apiService = apiService;
     this.tiles = this.generateBoard();
     this.apiService.getPlayingFigures().subscribe(result => this.onFiguresResponse(result), error => console.error(error));
-
   }
 
   public getTiles() {
-    return this.subject.asObservable();
+    return this.tilesSubject.asObservable();
   }
+
+  public getMessage() {
+    return this.messageSubject.asObservable();
+}
 
   public setNewFigureAsActive(newFigure: Figure) {
     this.activeFigure = newFigure;
@@ -89,17 +94,19 @@ export class GameManagerService {
   private selectFigureAndShowMoves(figure: PlayingFigure) {
     console.info(`Action: select and show moves`);
     this.activeFigure = figure;
-    this.apiService.getMovesForFigure(figure).subscribe(result => this.onAllowedMovesResponse(result));
+    this.apiService.getMovesForFigure(figure).subscribe(result => this.onAllowedMovesResponse(result), error => this.onFiguresResponseError(error));
   }
 
   private onFiguresResponse(result: PlayingFigure[]) {
     this.cancelSelection();
     this.refreshContext(result);
+    this.shareMessage("Ok");
   }
 
-  private onFiguresResponseError(error: any) {
+  private onFiguresResponseError(error: HttpErrorResponse) {
     this.cancelSelection();
     console.error(error);
+    this.shareMessage(error.error?.detail);
   }
 
   private onAllowedMovesResponse(result: Position[]): void {
@@ -159,18 +166,22 @@ export class GameManagerService {
     this.shareResult();
   }
 
+  private shareMessage(message: string) {
+    this.messageSubject.next(message);
+  }
+
   private shareResult() {
-    this.subject.next(this.tiles);
+    this.tilesSubject.next(this.tiles);
   }
 
   private generateBoard(): Tile[][] {
     let tiles: Tile[][] = [];
     let asciiNumberOfLetterA = 65;
     for (let x = 0; x <= 7; x++) {
-      let readableRowNumber: string = (-(x - 8)).toString();
+      let readableColumnName = String.fromCharCode(asciiNumberOfLetterA + x);
       let column: Tile[] = [];
       for (let y = 0; y <= 7; y++) {
-        let readableColumnName = String.fromCharCode(asciiNumberOfLetterA + y);
+      let readableRowNumber: string = (y+1).toString();
         let currentTileClass = (x + y) % 2 == 0 ? 'tile-black' : 'tile-white';
         let tile: Tile = { x: x, y: y, class: currentTileClass, occupiedBy: undefined, readablePosition: readableColumnName + readableRowNumber, markedToMove: false };
         column[y] = tile;

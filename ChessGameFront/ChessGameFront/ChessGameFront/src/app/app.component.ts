@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { NewFigureDto } from '../dto/new-figure-dto';
 import { GameManagerService } from '../manager/game-manager.service';
@@ -18,6 +19,7 @@ export class AppComponent implements OnInit {
   private gameManager: GameManagerService;
   public figuresOffBoard: Figure[] = [];
   public tiles: Tile[][] = [];
+  public message: string = "";
 
   constructor(apiService: ChessApiClientService, gameManager: GameManagerService) {
     this.apiService = apiService;
@@ -25,8 +27,10 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.apiService.getNewFigures().subscribe(result => this.onNewFiguresResult(result), error => console.error());
-    this.gameManager.getTiles().subscribe(result => this.tiles = result, error => console.error(error));
+    this.apiService.getNewFigures().subscribe(result => this.onNewFiguresResult(result), error => this.handleError(error));
+
+    this.gameManager.getTiles().subscribe(result => this.tiles = result, error => this.handleError(error));
+    this.gameManager.getMessage().subscribe(result => this.message = result, error => this.handleError(error));
   }
 
   public cancelSelection() {
@@ -35,9 +39,20 @@ export class AppComponent implements OnInit {
 
   onTileClicked(tileClicked: Tile) {
     this.gameManager.onTileClicked(tileClicked);
+    this.showMessage(tileClicked);
   }
+  private showMessage(clicked: any) {
+
+    if ("x" in clicked) {
+      this.message = `Tile [${clicked.x}, ${clicked.y}] selected.`;
+      if (clicked.occupiedBy) this.message = `${clicked.occupiedBy.player} ${clicked.occupiedBy.figureType} selected`;
+      else this.message += ' No figure selected.';
+    }
+  }
+
   onNewFigureClicked(figureClicked: Figure) {
     this.gameManager.setNewFigureAsActive(figureClicked);
+    this.message = `${figureClicked.player} ${figureClicked.figureType} selected`;
   }
 
   onNewFiguresResult(result: Figure[]) {
@@ -51,7 +66,13 @@ export class AppComponent implements OnInit {
   }
 
   title = 'ChessGameFront';
+
+  handleError(error: HttpErrorResponse) {
+    this.message = error.error?.detail;
+    console.log(error);
+  }
 }
+
 
 //TODO export creation to another file
 export function imagePathFor(fig: PlayingFigure | Figure): string {
