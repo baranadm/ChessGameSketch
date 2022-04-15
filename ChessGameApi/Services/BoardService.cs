@@ -94,7 +94,9 @@ namespace ChessGameApi.Services
                 X = newPosition.X,
                 Y = newPosition.Y,
             };
-            await figureRepository.UpdateFigureAsync(afterMove);
+
+            FigureEntity maybePromoted = promoteFigureIfPossible(afterMove);
+            await figureRepository.UpdateFigureAsync(maybePromoted);
         }
 
         private async Task takeFigureIfExists(FieldDto newPosition)
@@ -123,6 +125,15 @@ namespace ChessGameApi.Services
                     await enPassantRepository.NewEnPassantFieldAsync(enPassantField);
                 }
             }
+        }
+
+        private FigureEntity promoteFigureIfPossible(FigureEntity figure)
+        {
+            if(figure.Player == "White" && figure.Y == 7 || figure.Player == "Black" && figure.Y == 0)
+            {
+                return figure with { FigureType = "Queen"};
+            }
+            return figure;
         }
 
         public async Task DeleteFigureAsync(Guid id)
