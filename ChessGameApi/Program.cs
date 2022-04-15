@@ -1,10 +1,7 @@
 using ChessGameApi.Entities;
 using ChessGameApi.Repositories;
-using ChessGameApi.Settings;
-using ChessGameSketch;
 using ChessGameSketch.Validator;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +19,6 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 
 builder.Services.AddControllers(options => options.SuppressAsyncSuffixInActionNames = false);
-builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
 builder.Services.AddSingleton<IFigureRepository, InMemFigureRepository>();
 builder.Services.AddSingleton<IEnPassantRepository, InMemEnPassantRepository>();
 builder.Services.AddSingleton<IChessValidator, ChessValidator>();
@@ -42,7 +38,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// ?
 app.UseRouting();
 
 app.UseCors();
